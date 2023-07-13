@@ -78,7 +78,7 @@ class QueryCardInfo  extends Helper {
         }
         result.size() == 0
         where:
-        memberNo = '391924410999520971'
+        memberNo = '391003870323196996'
     }
 
     def "call uploadgoodsdetail with member_no"(){ // 新增一个OrderItem, "barcode":"050733" 会返回

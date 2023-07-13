@@ -132,7 +132,7 @@ class Helper extends Specification {
     protected PaymentRefundRequest createPaymentRefundRequest(String code, String oldTradeNo, Double totalFee){
         def refundOutTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
         def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'old_trade_no': oldTradeNo, 'order_items':[],
-                     'out_trade_no': refundOutTradeNo, 'trade_no':refundOutTradeNo + tradeNoPostfix]
+                     'out_trade_no': store_id.concat(refundOutTradeNo), 'trade_no':store_id.concat(refundOutTradeNo) + tradeNoPostfix]
         if(totalFee){
             paras = paras + ['pay_code': code, 'refund_fee': totalFee]
         }
@@ -168,7 +168,7 @@ class Helper extends Specification {
                 ExchangeConfirmCoupons es = new ExchangeConfirmCoupons(['amt':it.amt, 'code': it.code])
                 ExchangeConfirmReceive er = new ExchangeConfirmReceive(['amt':it.amt, 'code': it.code])
                 amt = amt + it.amt
-                paras['pay_amt'] = 6.9
+                paras['pay_amt'] = amt
                 paras['total_fee'] = amt
 
                 paras = paras + ['receive':receiveList<<er, 'coupons':couponsList<<es]
