@@ -4,6 +4,7 @@ import com.kargo.request.UnFreezeRequest
 import com.kargo.request.coupon.CouponCaluRequest
 import com.kargo.request.coupon.CouponCancelRequest
 import com.kargo.request.coupon.CouponConfirmRequest
+import com.kargo.request.coupon.CouponRefundReqeust
 import com.kargo.request.detail.OrderItem
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.GoodsDetailResponse
@@ -11,24 +12,36 @@ import com.kargo.response.UnFreezeResponse
 import com.kargo.response.coupon.CouponCaluResponse
 import com.kargo.response.coupon.CouponCancelResponse
 import com.kargo.response.coupon.CouponConfirmResponse
+import com.kargo.response.coupon.CouponRefundResponse
 import spock.lang.Ignore
 import spock.lang.Shared
 
-class DuoDian extends Helper {
-    @Shared GoodsDetailResponse goodsDetailResponse
-    @Shared BarcodeResponse, barcodeYoRenResponse
-    @Shared CouponConfirmResponse couponConfirmResponse
-    @Shared CouponCaluResponse couponCaluResponse
-    @Shared CouponCancelResponse couponCancelResponse
-    @Shared outTradeNo, tradeNo
-    @Shared totalFee = 0.00
-    @Shared items, blackItems
-    @Shared LawsonPosHubService goodsClient, barcodeClient, couponBarCodeClient, traderefundClient, tradeconfirmClient, unfreezeClient, couponConfirmeClient, couponCancelClient
+class DDCouponRefund extends Helper {
+    @Shared
+    GoodsDetailResponse goodsDetailResponse
+    @Shared
+    CouponCaluRequest couponCaluRequest
+    @Shared
+            BarcodeResponse, barcodeYoRenResponse
+    @Shared
+    CouponConfirmResponse couponConfirmResponse
+    @Shared
+    CouponCaluResponse couponCaluResponse
+    @Shared
+    CouponRefundResponse couponRefundResponse
+    @Shared
+            outTradeNo, tradeNo
+    @Shared
+            totalFee = 0.00
+    @Shared
+            items, blackItems
+    @Shared
+    LawsonPosHubService goodsClient, barcodeClient, couponBarCodeClient, traderefundClient, tradeconfirmClient, unfreezeClient, couponConfirmeClient, couponRefundClient
 
-    def setupSpec(){
+    def setupSpec() {
         // 初始化 LawsonPosHubService 参数 https://lawson-poshub.kargotest.com;http://121.43.156.191:21001
         //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://10.100.70.120:7001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        def env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'https://lawson-poshub.kargotest.com', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        def env = ['mid': 'DEFAULT', 'sessionKey': '9Y3SGFCLR2BH4T51', 'kargoUrl': 'http://121.43.156.191:21001', 'store_id': '208888', 'user_id': '00000002', 'pos_id': '01', 'jar_version': '1']
         //prd = ['mid':'DEFAULT', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://47.97.19.94:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
 
         // 全局out_trade_no, 所有交易相同
@@ -36,7 +49,7 @@ class DuoDian extends Helper {
         barcodeClient = createLawsonPosHubService(env, '/barcode')
         couponBarCodeClient = createLawsonPosHubService(env, '/couponBarCode')
         couponConfirmeClient = createLawsonPosHubService(env, '/couponConfirm')
-        couponCancelClient = createLawsonPosHubService(env, '/couponCancel')
+        couponRefundClient = createLawsonPosHubService(env, '/couponRefund')
         tradeconfirmClient = createLawsonPosHubService(env, '/tradeconfirm')
         traderefundClient = createLawsonPosHubService(env, '/traderefund')
         unfreezeClient = createLawsonPosHubService(env, '/unfreeze')
@@ -53,7 +66,7 @@ class DuoDian extends Helper {
         //blackItems = []
     }
 
-    def "call uploadgoodsdetail without member_no"(){
+    def "call uploadgoodsdetail without member_no"() {
         given:
         // 商品明细
         GoodsDetailRequest request = createGoodsDetailRequest(null, outTradeNo, items, blackItems)
@@ -62,21 +75,21 @@ class DuoDian extends Helper {
         //totalFee = 0.01
         goodsDetailResponse = (GoodsDetailResponse) goodsClient.execute(request)
         then:
-        with(goodsDetailResponse){
+        with(goodsDetailResponse) {
             pay_code == '038'
             ret_code == '00'
             responseCode == '0000'
         }
     }
 
-    def "call barcode with YoRen"(){
+    def "call barcode with YoRen"() {
         given:
         def request = createBarCodeRequest(memberNo, outTradeNo, totalFee)
 
         when:
         barcodeYoRenResponse = (BarcodeResponse) barcodeClient.execute(request)
         then:
-        with(barcodeYoRenResponse){
+        with(barcodeYoRenResponse) {
             responseCode == '0000'
             biz_type == '02'
             ret_code == '00'
@@ -87,7 +100,7 @@ class DuoDian extends Helper {
         memberNo = '391715837484026315'
     }
 
-    def "call uploadgoodsdetail with member_no"(){
+    def "call uploadgoodsdetail with member_no"() {
         given:
         GoodsDetailRequest request = createGoodsDetailRequest(barcodeYoRenResponse.user_info.code, outTradeNo, items, blackItems)
         totalFee = request.getTotal_fee()
@@ -96,7 +109,7 @@ class DuoDian extends Helper {
         when:
         goodsDetailResponse = (GoodsDetailResponse) goodsClient.execute(request)
         then:
-        with(goodsDetailResponse){
+        with(goodsDetailResponse) {
             pay_code == '038'
             ret_code == '00'
             responseCode == '0000'
@@ -104,14 +117,13 @@ class DuoDian extends Helper {
         }
     }
 
-    def "call couponBarCode"(){
+    def "call couponBarCode"() { // -----> /dmall/coupon/hangupCalculate
         given:
-        CouponCaluRequest request = createCouponCaluRequest(DDMemberNo, outTradeNo, '01', items, blackItems)
-        tradeNo = request.trade_no
+        couponCaluRequest = createCouponCaluRequest(DDMemberNo, outTradeNo, '01', items, blackItems)
         when:
-        couponCaluResponse = (CouponCaluResponse) couponBarCodeClient.execute(request)
+        couponCaluResponse = (CouponCaluResponse) couponBarCodeClient.execute(couponCaluRequest)
         then:
-        with(couponCaluResponse){
+        with(couponCaluResponse) {
             responseCode == '0000'
             couonPayCode == '024'
         }
@@ -119,38 +131,25 @@ class DuoDian extends Helper {
         DDMemberNo = 'L12522847241471238'
     }
 
-    def "call couponCancel"(){
-        given:
-        CouponCancelRequest request = createCouponCancelRequest(outTradeNo, tradeNo ,'01', couponCaluResponse.getyList())
-        when:
-        couponCancelResponse = (CouponCancelResponse) couponCancelClient.execute(request)
-        then:
-        with(couponCancelResponse){
-            responseCode == '0000'
-        }
-    }
-
-    def "call couponConfirm"(){
+    def "call couponConfirm"() { // -----> /dmall/coupon/useCoupon
         given:
         CouponConfirmRequest request = createCouponConfirm(outTradeNo, '01', couponCaluResponse.getyList())
         when:
         couponConfirmResponse = (CouponConfirmResponse) couponConfirmeClient.execute(request)
         then:
-        with(couponConfirmResponse){
+        with(couponConfirmResponse) {
             responseCode == '0000'
         }
     }
 
-    def "call unfreeze"(){
+    def "call couponRefund"() { // -----> /dmall/coupon/recoverCoupon
         given:
-        UnFreezeRequest unFreezeRequest = createUnFreezeRequest(outTradeNo, barcodeYoRenResponse.user_info.code)
+        CouponRefundReqeust request = createCouponRefundReqeust(couponCaluRequest.trade_no, outTradeNo, couponCaluRequest.venderCode, couponCaluResponse.getyList())
         when:
-        UnFreezeResponse unFreezeResponse = (UnFreezeResponse) unfreezeClient.execute(unFreezeRequest)
+        couponRefundResponse = (CouponRefundResponse) couponRefundClient.execute(request)
         then:
-        with(unFreezeResponse){
+        with(couponRefundResponse) {
             responseCode == '0000'
         }
-        where:
-        memberNo = '1900267772339'
     }
 }

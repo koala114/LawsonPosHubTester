@@ -168,7 +168,7 @@ class Helper extends Specification {
                 ExchangeConfirmCoupons es = new ExchangeConfirmCoupons(['amt':it.amt, 'code': it.code])
                 ExchangeConfirmReceive er = new ExchangeConfirmReceive(['amt':it.amt, 'code': it.code])
                 amt = amt + it.amt
-                paras['pay_amt'] = amt
+                paras['pay_amt'] = 6.9
                 paras['total_fee'] = amt
 
                 paras = paras + ['receive':receiveList<<er, 'coupons':couponsList<<es]
