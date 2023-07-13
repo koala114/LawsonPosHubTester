@@ -1,5 +1,7 @@
 import com.kargo.LawsonPosHubService
+import com.kargo.internal.GenerateQRCode
 import com.kargo.request.GoodsDetailRequest
+import com.kargo.request.QRCodeRequest
 import com.kargo.request.UnFreezeRequest
 import com.kargo.request.coupon.CouponCaluRequest
 import com.kargo.request.coupon.CouponCancelRequest
@@ -8,6 +10,7 @@ import com.kargo.request.coupon.CouponRefundReqeust
 import com.kargo.request.detail.OrderItem
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.GoodsDetailResponse
+import com.kargo.response.QRCodeRequestResponse
 import com.kargo.response.UnFreezeResponse
 import com.kargo.response.coupon.CouponCaluResponse
 import com.kargo.response.coupon.CouponCancelResponse
@@ -62,7 +65,7 @@ class DDCouponRefund extends Helper {
         def blackItem1 = jsonSlurper.parseText("{\"barcode\":\"1345597486671291400\",\"commission_sale\":\"0\",\"discount_info_list\":[],\"goods_category\":\"51\",\"kagou_sign\":\"N\",\"name\":\"黑名单1\",\"quantity\":1,\"row_no\":1,\"sell_price\":0.33,\"total_amount\":0.33,\"total_discount\":0}")
         def blackItem2 = jsonSlurper.parseText("{\"barcode\":\"2501858005102\",\"commission_sale\":\"0\",\"discount_info_list\":[],\"goods_category\":\"51\",\"kagou_sign\":\"N\",\"name\":\"黑名单2\",\"quantity\":1,\"row_no\":1,\"sell_price\":0.33,\"total_amount\":0.33,\"total_discount\":0}")
         def blackItem3 = jsonSlurper.parseText("{\"barcode\":\"4901777374461\",\"commission_sale\":\"0\",\"discount_info_list\":[{\"discount_amount\":8.00,\"discount_quantity\":2.0}],\"goods_category\":\"51\",\"kagou_sign\":\"N\",\"name\":\"三得利-196℃桃子配制酒\",\"quantity\":2,\"row_no\":3,\"sell_price\":15.9,\"total_amount\":31.80,\"total_discount\":8.00}");
-        blackItems = [new OrderItem(blackItem1), new OrderItem(blackItem2), new OrderItem(blackItem3)]
+      //  blackItems = [new OrderItem(blackItem1), new OrderItem(blackItem2), new OrderItem(blackItem3)]
         //blackItems = []
     }
 
