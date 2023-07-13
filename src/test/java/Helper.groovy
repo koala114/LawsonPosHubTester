@@ -62,7 +62,7 @@ class Helper extends Specification {
         log.info("totalFee - discount = " + totalFee)
 
         def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':0, 'out_trade_no':store_id + outTradeNo,
-                     'pos_id':pos_id, 'pos_version':'1', 'store_id': store_id, 'total_fee':totalFee, 'user_id':user_id, 'order_items':its]
+                     'pos_id':pos_id, 'pos_version':'1', 'store_id': store_id, 'total_fee':totalFee.round(2), 'user_id':user_id, 'order_items':its]
         GoodsDetailRequest request = new GoodsDetailRequest(*:paras)
         return request
     }
@@ -80,7 +80,7 @@ class Helper extends Specification {
         log.info("totalFee - discount = " + totalFee)
 
         def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':1, 'out_trade_no':store_id + outTradeNo,
-                     'pos_id':pos_id, 'pos_version':'1', 'store_id': this.store_id, 'total_fee':totalFee, 'user_id':user_id, 'order_items':its]
+                     'pos_id':pos_id, 'pos_version':'1', 'store_id': this.store_id, 'total_fee':totalFee.round(2), 'user_id':user_id, 'order_items':its]
         if(memberNo)
             paras << [ 'member_no': memberNo]
         GoodsDetailRequest request = new GoodsDetailRequest(*:paras)
@@ -143,36 +143,23 @@ class Helper extends Specification {
         return request
     }
 
-    protected PaymentReverseRequest createPaymentReverseRequest(String outTradeNo, String tradeNo, String payCode){
+    protected PaymentReverseRequest createPaymentReverseRequest(String outTradeNo, String tradeNo){
         def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'out_trade_no':  store_id + outTradeNo, 'pos_id':pos_id, 'store_id':store_id, 'trade_no':tradeNo, 'user_id':user_id]
-        if(payCode)
-            paras = paras + ['pay_code':payCode]
         PaymentReverseRequest request = new PaymentReverseRequest(paras)
         return request
     }
 
-    protected ExchangeConfirmRequest createExchangeConfirmRequest(String memberNo,String outTradeNo, def coupons){
-        def receiveList = []
-        def couponsList = []
-        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'out_trade_no':  store_id + outTradeNo, 'pos_id':pos_id, 'store_id':store_id, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix), 'user_id':user_id]
-        //def paras = ['dt':'2023-07-10 19:05:38', 'out_trade_no':  20188201148821, 'pay_amt':6.90, 'pos_id':'01', 'store_id':'201882', 'total_fee':6.90, 'trade_no':'2018820114882103', 'user_id':'20188201']
+    protected ExchangeConfirmRequest createExchangeConfirmRequest(String memberNo, String outTradeNo, Double totalFee, Double payAmt, String code){
+        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'out_trade_no':  store_id + outTradeNo, 'pay_amt':payAmt, 'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix), 'user_id':user_id]
 
         if(memberNo)
             paras = paras + ['member_no':memberNo]
 
-        if(coupons){
-            def amt = 0.0
+        if(code){
             // 有券号时（code）即兑换业务，否则撤销业务
-            def couponsJson = jsonSlurper.parseText(coupons)
-            couponsJson.each{
-                ExchangeConfirmCoupons es = new ExchangeConfirmCoupons(['amt':it.amt, 'code': it.code])
-                ExchangeConfirmReceive er = new ExchangeConfirmReceive(['amt':it.amt, 'code': it.code])
-                amt = amt + it.amt
-                paras['pay_amt'] = amt
-                paras['total_fee'] = amt
-
-                paras = paras + ['receive':receiveList<<er, 'coupons':couponsList<<es]
-            }
+            ExchangeConfirmCoupons es = new ExchangeConfirmCoupons(['amt':payAmt, 'code': code])
+            ExchangeConfirmReceive er = new ExchangeConfirmReceive(['amt':payAmt, 'code': code])
+            paras = paras + ['receive':[er], 'coupons':[es]]
         }
         ExchangeConfirmRequest request = new ExchangeConfirmRequest(paras)
         return request
@@ -199,17 +186,18 @@ class Helper extends Specification {
         return request
     }
 
-    protected CouponRefundReqeust createCouponRefundReqeust(String vanderCode, def yList){
-//        def currCalcUuid = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
-//        def couponCodeList = []
-//        yList.each{
-//            couponCodeList << it.couponCode
-//        }
-//        def paras = ['storeCode':store_id, 'venderCode':vanderCode, 'orderUseCoupsReqs':couponCodeList,
-//                     'orderAction':0, 'currCalcUuid':currCalcUuid]
-//
-//        CouponRefundReqeust request = new CouponRefundReqeust(paras)
-//        return request
+    protected CouponRefundReqeust createCouponRefundReqeust(String oldTradeNo, String outTradeNo, String vanderCode, def yList){
+        def refundTradeNo= (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
+        def couponCodeList = []
+        yList.each{
+            couponCodeList << ['couponCode':it.couponCode, 'orderId':store_id.concat(outTradeNo)]
+        }
+        def paras = ['old_trade_no':oldTradeNo, 'storeCode':store_id, 'venderCode':vanderCode, 'orderUseCoupsReqs':couponCodeList,
+                     'orderAction':0, 'orderAction':0, 'out_trade_no':store_id.concat(refundTradeNo), 'trade_no':store_id.concat(refundTradeNo).concat(++tradeNoPostfix),
+        'currCalcUuid':store_id.concat(refundTradeNo).concat(++tradeNoPostfix)]
+
+        CouponRefundReqeust request = new CouponRefundReqeust(paras)
+        return request
     }
 
     protected CouponCancelRequest createCouponCancelRequest(String outTradeNo, String tradeNo, String vanderCode, def yList){
@@ -253,7 +241,7 @@ class Helper extends Specification {
         log.info("totalFee - discount = " + totalFee)
         its.each {
             // totalSharedPrice以分为单位
-            def paras = ['gift':false, 'matnr': it.barcode, 'name': it.name, 'num':it.quantity,'totalOriginPrice':it.total_amount*100, 'totalSharedPrice':it.total_amount*100, 'totalWarePrice':it.total_amount*100, 'wareType':1, 'uuid':it.row_no.toString()]
+            def paras = ['gift':false, 'matnr': it.barcode, 'name': it.name, 'num':it.quantity, 'totalSharedPrice':it.total_amount*100, 'totalWarePrice':it.total_amount*100, 'wareType':1, 'uuid':it.row_no.toString()]
             wareReqDtoArrayList << new WareReqDto(paras)
         }
         def paras = ['otpCode':optCode, 'needHangUp':true, 'storeCode':store_id, 'venderCode':vanderCode, 'wareReqVOList':wareReqDtoArrayList,
