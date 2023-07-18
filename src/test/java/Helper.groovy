@@ -4,6 +4,7 @@ import com.kargo.request.BarCodeRequest
 import com.kargo.request.CreatePaymentRequest
 import com.kargo.request.ExchangeConfirmRequest
 import com.kargo.request.GoodsDetailRequest
+import com.kargo.request.HlOkCardCancelRequest
 import com.kargo.request.HlOkCardPayRequest
 import com.kargo.request.HlOkCardRefundRequest
 import com.kargo.request.PaymentConfirmRequest
@@ -190,6 +191,13 @@ class Helper extends Specification {
         HlOkCardPayRequest request = new HlOkCardPayRequest(paras)
         return request
     }
+
+    protected HlOkCardCancelRequest createHlOkCardCancelRequest(String outTradeNo, String tradeNo, Double totalFee){
+        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'pay_code':'009', 'out_trade_no': outTradeNo, 'trade_no':tradeNo, 'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'user_id':user_id, 'accessCode':'MDAxBNMNyYuKEA7KUs48Tfnhvc7HJdNaTuf+cYot6vubfaqFwByhaClED3Sh/j9/cLF/ulVRBVSrJhuufhcqSxe90aDQwUfOMz21y0t/q+cLj6kcIy4a50fzK+HD0tnpMZvXTIthRpRdi71nXBdVYLvd+q/SD9kzYeITkxl/d7RfIybCTzEb']
+        HlOkCardCancelRequest request = new HlOkCardCancelRequest(paras)
+        return request
+    }
+
     protected HlOkCardRefundRequest createHlOkCardRefundRequest(String oldTradeNo, String totalFee){
         def refundOutTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
         def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'old_trade_no':oldTradeNo, 'order_items':[],
