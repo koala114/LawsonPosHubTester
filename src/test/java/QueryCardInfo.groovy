@@ -28,7 +28,7 @@ class QueryCardInfo  extends Helper {
     def setupSpec(){
         dbVerifier = new DBVerifier()
         // 初始化 LawsonPosHubService 参数
-        env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'https://lawson-poshub.kargotest.com', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://121.43.156.191:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
         goodsClient = createLawsonPosHubService(env, '/uploadgoodsdetail')
         barcodeClient = createLawsonPosHubService(env, '/barcode')
         queryCardClient = createLawsonPosHubService(env, '/querycardinfo')
