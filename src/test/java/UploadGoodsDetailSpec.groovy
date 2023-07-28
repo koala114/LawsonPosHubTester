@@ -74,7 +74,7 @@ class UploadGoodsDetailSpec extends Helper {
             ['1900267772339', '1900213189174'].contains(user_info.code) //YoRen测试环境会员号
         }
         where:
-        memberNo = '391003870323196996'
+        memberNo = '391612620606353982'
     }
 
     def "call uploadgoodsdetail with member_no"(){

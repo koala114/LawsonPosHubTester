@@ -2,6 +2,7 @@ import com.kargo.LawsonPosHubService
 import com.kargo.request.BarCodeRequest
 import com.kargo.request.ExchangeConfirmRequest
 import com.kargo.request.GoodsDetailRequest
+import com.kargo.request.HealthCheckRequest
 import com.kargo.request.PaymentConfirmRequest
 import com.kargo.request.PaymentRefundRequest
 import com.kargo.request.QueryCardInfoRequest
@@ -10,6 +11,7 @@ import com.kargo.request.detail.OrderItem
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.ExchangeConfirmResponse
 import com.kargo.response.GoodsDetailResponse
+import com.kargo.response.HealthCheckResponse
 import com.kargo.response.PaymentRefundResponse
 import com.kargo.response.QueryCardInfoResponse
 import com.kargo.response.UnFreezeResponse
@@ -29,8 +31,8 @@ class FastBaseline extends Helper {
 
     def setupSpec(){
         // 初始化 LawsonPosHubService 参数 https://lawson-poshub.kargotest.com, http://121.43.156.191:21001
-        //env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://10.100.70.120:7001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'https://lawson-poshub.kargotest.com', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:9000', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        //env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://121.43.156.191:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
         //env = ['mid':'DEFAULT', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://47.97.19.94:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1.9-3']
 
         goodsClient = createLawsonPosHubService(env, '/uploadgoodsdetail')
@@ -77,10 +79,9 @@ class FastBaseline extends Helper {
         '1900267772339'|true
     }
 
-    @Ignore
-    def "call unfreeze"(){
+    def "call unfreeze"(){  // -----> /pos/v1/pos/couponCorrection
         given:
-        UnFreezeRequest unFreezeRequest = createUnFreezeRequest(outTradeNo, memberNo)
+        UnFreezeRequest unFreezeRequest = createUnFreezeRequest("20888814142409173", "1900267772339")
         when:
         UnFreezeResponse unFreezeResponse = (UnFreezeResponse) unfreezeClient.execute(unFreezeRequest)
         then:
@@ -164,5 +165,18 @@ class FastBaseline extends Helper {
         with(exchangeConfirmResp){
             responseCode == '0000'
         }
+    }
+
+    def "call health"(){
+        given:
+        def healthClient = createLawsonPosHubService(env, '/health')
+        HealthCheckRequest healthCheckRequest = new HealthCheckRequest()
+        when:
+        HealthCheckResponse healthCheckResponse = (HealthCheckResponse) healthClient.execute(healthCheckRequest)
+        then:
+        with(healthCheckResponse){
+            responseCode == '0000'
+        }
+
     }
 }

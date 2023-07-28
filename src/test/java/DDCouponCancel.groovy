@@ -28,7 +28,7 @@ class DDCouponCancel extends Helper {
     def setupSpec(){
         // 初始化 LawsonPosHubService 参数 https://lawson-poshub.kargotest.com;http://121.43.156.191:21001
         //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://10.100.70.120:7001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        def env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'https://lawson-poshub.kargotest.com', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        def env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://121.43.156.191:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
         //prd = ['mid':'DEFAULT', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://47.97.19.94:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
 
         // 全局out_trade_no, 所有交易相同
@@ -84,7 +84,7 @@ class DDCouponCancel extends Helper {
             ['1900267772339', '1900213189174'].contains(user_info.code) //YoRen测试环境会员号
         }
         where:
-        memberNo = '391715837484026315'
+        memberNo = '391003870323196996'
     }
 
     def "call uploadgoodsdetail with member_no"(){

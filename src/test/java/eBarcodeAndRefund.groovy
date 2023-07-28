@@ -28,7 +28,7 @@ class eBarcodeAndRefund extends Helper {
     def setupSpec(){
         dbVerifier = new DBVerifier()
         //dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://10.100.70.181:7001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://121.43.156.191:21002', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://121.43.156.191:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
         //dev = ['mid':'98621000008', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://47.97.19.94:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
 
         //dev = ['mid':'98621000008', 'storeCode':'203118', 'user_id':'20311801',  'pos_id':'01', 'sessionKey':'LAWSONJZ2NJKARGO']
@@ -68,7 +68,7 @@ class eBarcodeAndRefund extends Helper {
         given:
         def client = createLawsonPosHubService(dev, '/traderefund')
         //PaymentRefundRequest request = createPaymentRefundRequest(barcodeResponse.pay_code, barcodeResponse.getOut_trade_no() + "99", 0.33 )
-        PaymentRefundRequest request = createPaymentRefundRequest("057", "208888131729211421", 0.01 )
+        PaymentRefundRequest request = createPaymentRefundRequest("050", "208888021080706", 7.5 )
         when:
         resp = (PaymentRefundResponse) client.execute(request)
         /* 期望结果 */
