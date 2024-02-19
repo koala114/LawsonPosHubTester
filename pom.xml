@@ -22,6 +22,7 @@
                 <executions>
                     <execution>
                         <goals>
+                            <goal>addTestSources</goal>
                             <goal>testCompile</goal>
                         </goals>
                     </execution>
@@ -29,11 +30,11 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.1.2</version>
                 <configuration>
-                    <useFile>false</useFile> <includes>
-                    <include>**/*Spec.java</include>
-                </includes>
+                    <includes>
+                    <include>**/*Spec.*</include>
+                    </includes>
                 </configuration>
             </plugin>
         </plugins>
@@ -83,8 +84,7 @@
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.22.2</version>
-            <scope>test</scope>
+            <version>3.1.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.zxing</groupId>
