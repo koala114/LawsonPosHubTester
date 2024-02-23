@@ -28,7 +28,7 @@ class ExchangeConfirmRevokeSpec extends Specification {
         blackItems = []
 
         when:
-        def (GoodsDetailResponse goodsDetailResponse, GoodsDetailRequest goodsDetailReqObj) = uploadGoodsRequest(null, outTradeNo, items, blackItems)
+        def (GoodsDetailResponse goodsDetailResponse, goodsDetailReqObj) = uploadGoodsRequest(null, outTradeNo, items, blackItems)
         goodsDetailRequest = goodsDetailReqObj
         then:
         with(goodsDetailResponse){
