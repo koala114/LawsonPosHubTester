@@ -1,6 +1,7 @@
 package ALaDing
 
 import Core.RequestDelegate
+import com.kargo.request.GoodsDetailRequest
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.ExchangeConfirmResponse
 import com.kargo.response.GoodsDetailResponse
@@ -10,6 +11,7 @@ import spock.lang.Shared
 
 class ExchangeConfirmSpec extends Specification {
     @Shared BarcodeResponse barcodeResponse, barcodeYoRenResponse
+    @Shared GoodsDetailRequest goodsDetailRequest
     @Shared outTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
     @Shared totalFee = 0.00
     @Shared items, blackItems
@@ -26,7 +28,8 @@ class ExchangeConfirmSpec extends Specification {
         blackItems = []
 
         when:
-        def (GoodsDetailResponse goodsDetailResponse, totalFee) = uploadGoodsRequest(null, outTradeNo, items, blackItems)
+        def (GoodsDetailResponse goodsDetailResponse, goodsDetailReqObj) = uploadGoodsRequest(null, outTradeNo, items, blackItems)
+        goodsDetailRequest = goodsDetailReqObj
         then:
         with(goodsDetailResponse){
             pay_code == '038'
@@ -36,7 +39,7 @@ class ExchangeConfirmSpec extends Specification {
 
     def "call barcode with YoRen"(){
         given:
-        def amount = totalFee // 总金额
+        def amount = goodsDetailRequest.total_fee // 总金额
         when:
         barcodeYoRenResponse = barCodeRequest(memberNo, outTradeNo, amount)
         then:
@@ -53,7 +56,8 @@ class ExchangeConfirmSpec extends Specification {
     def "call uploadgoodsdetail with member_no"(){
         given:
         when:
-        def (GoodsDetailResponse goodsDetailResponse, totalFee) = uploadGoodsRequest(barcodeYoRenResponse.user_info.code, outTradeNo, items, blackItems)
+        def (GoodsDetailResponse goodsDetailResponse, goodsDetailReqObj) = uploadGoodsRequest(barcodeYoRenResponse.user_info.code, outTradeNo, items, blackItems)
+        goodsDetailRequest = goodsDetailReqObj
         then:
         with(goodsDetailResponse){
             pay_code == '038'
@@ -64,7 +68,7 @@ class ExchangeConfirmSpec extends Specification {
 
     def "call barcode to payment"(){
         given:
-        def amount = totalFee // 总金额
+        def amount = goodsDetailRequest.total_fee // 总金额
         when:
         barcodeResponse = barCodeRequest(pan, outTradeNo, amount)
         then:
@@ -86,7 +90,7 @@ class ExchangeConfirmSpec extends Specification {
         given:
         // 兑换业务传券号；撤销业务不传券号也需要传券金额payAmt
         def coupons = [["code":"899429724020614340309000000000010007", "amt": 10.0]]
-        def amount = totalFee // 总金额
+        def amount = goodsDetailRequest.total_fee // 总金额
         when:
         ExchangeConfirmResponse exchangeConfirmResp = exchangeConfirmRequest(outTradeNo, coupons, 10.0, amount)
         then:
@@ -97,7 +101,7 @@ class ExchangeConfirmSpec extends Specification {
 
     def "call confirm"(){
         given:
-        def amount = totalFee // 总金额
+        def amount = goodsDetailReqObj // 总金额
         when:
         def paymentConfirmResponse = paymentConfirmRequest([], barcodeYoRenResponse.getUser_info().code, outTradeNo, totalFee, 0, 0)
         then:
