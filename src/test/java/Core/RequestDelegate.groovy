@@ -39,6 +39,13 @@ class RequestDelegate extends Helper {
         return [response, request]
     }
 
+    def uploadGoodsRequest(String outTradeNo, OrderItem item){
+        LawsonPosHubService ls = lawsonPosHubService('/uploadgoodsdetail')
+        GoodsDetailRequest request = createGoodsDetailRequest(outTradeNo, item)
+        def response = ls.execute(request)
+        return response
+    }
+
     BarcodeResponse barCodeRequest(String memberNo, String outTradeNo, Double totalFee){
         LawsonPosHubService ls = lawsonPosHubService('/barcode')
         return ls.execute(createBarCodeRequest(memberNo, outTradeNo, totalFee))

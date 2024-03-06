@@ -1,8 +1,10 @@
 package FFT
 
 import Core.RequestDelegate
+import com.kargo.request.detail.OrderItem
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.CreatePaymentResponse
+import com.kargo.response.GoodsDetailResponse
 import groovy.json.JsonSlurper
 import spock.lang.Shared
 import spock.lang.Specification
@@ -35,6 +37,23 @@ class FFTCreatepaymentNoQuery extends Specification {
             ret_code == '1005'
             billBizInfos[0].bill_amt == 187.9
             biz_type == '04' // 付费通账单查询
+        }
+    }
+
+    def "call uploadgoodsdetail"(){
+        given:
+        def jsonSlurper = new JsonSlurper()
+        def item = jsonSlurper.parseText("{\"barcode\":\"2501311138102\",\"commission_sale\":\"0\",\"discount_info_list\":[],\"goods_category\":\"60\",\"kagou_sign\":\"N\",\"name\":\"嘉定水\",\"quantity\":1,\"row_no\":1,\"sell_price\":20.7,\"total_amount\":20.7,\"total_discount\":0}");
+        OrderItem orderItem = new OrderItem(*:item)
+
+        when:
+        GoodsDetailResponse goodsDetailResponse =  uploadGoodsRequest(outTradeNo,  orderItem)
+        then:
+        with(goodsDetailResponse){
+            responseCode == '0000'
+            responseMessage == '交易成功完成'
+            ret_code == '00'
+            pay_code == '038'
         }
     }
 

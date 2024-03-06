@@ -1,6 +1,7 @@
 package FFT
 
 import Core.RequestDelegate
+import com.kargo.request.detail.OrderItem
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.CreatePaymentResponse
 import com.kargo.response.GoodsDetailResponse
@@ -20,7 +21,7 @@ import spock.lang.Specification
 class FFTCreatepaymentQueryByBillNo extends Specification {
     @Shared BarcodeResponse barcodeResponse
     @Shared outTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
-    @Shared String pan = '3924020128353227000901803' // {"searchType":"0","searchTypeName":"用户代码","validationExp":"^\\d{10}$","remark":null,"needPwd":"N"}
+    @Shared def bill = ['barcode':'B544021264255625000055803', 'bill_amt':55.8] // {"searchType":"0","searchTypeName":"用户代码","validationExp":"^\\d{10}$","remark":null,"needPwd":"N"}
     @Delegate RequestDelegate requestDelegate
 
     def setup(){
@@ -30,24 +31,40 @@ class FFTCreatepaymentQueryByBillNo extends Specification {
 
     def "call barcode to payment"(){
         when:"Since searchType is 0 PosHub will send request of query.by.billno.service via com.shfft.oap.client.response.QueryByBillNoResponse"
-        barcodeResponse = barCodeRequest(pan, outTradeNo)
+        barcodeResponse = barCodeRequest(bill['barcode'], outTradeNo)
         then:
         with(barcodeResponse){
-            responseCode == '1005'
-            responseMessage == '不需要查询，请直接条码销账'
-            ret_code == '1005'
-            billBizInfos[0].bill_amt == 706.3
+            responseCode == '0000'
+            responseMessage == '交易成功完成'
+            ret_code == '00'
+            billBizInfos[0].bill_amt == bill['bill_amt']
             biz_type == '04' // 付费通账单查询
+            billBizInfos[0].status == '00' // 未支付
+        }
+    }
+
+    def "call uploadgoodsdetail"(){
+        given:
+        def item = ["barcode":"2501311278105","commission_sale":"0","discount_info_list":[],"goods_category":"60","kagou_sign":"N","name":barcodeResponse.billBizInfos[0].bill_org_name,"quantity":1,"row_no":1,
+                    "sell_price":barcodeResponse.billBizInfos[0].bill_amt,"total_amount":barcodeResponse.billBizInfos[0].bill_amt,"total_discount":0]
+        OrderItem orderItem = new OrderItem(*:item)
+        when:
+        GoodsDetailResponse goodsDetailResponse =  uploadGoodsRequest(outTradeNo,  orderItem)
+        then:
+        with(goodsDetailResponse){
+            responseCode == '0000'
+            responseMessage == '交易成功完成'
+            ret_code == '00'
+            pay_code == '038'
         }
     }
 
     def "call createPaymentRequest"(){
         given:
         def jsonSlurper = new JsonSlurper()
-        def item = jsonSlurper.parseText("{\"barcode\":\"2501311138102\",\"commission_sale\":\"0\",\"discount_info_list\":[],\"goods_category\":\"60\",\"kagou_sign\":\"N\",\"name\":\"嘉定水\",\"quantity\":1,\"row_no\":1,\"sell_price\":20.7,\"total_amount\":20.7,\"total_discount\":0}");
 
         when:
-        CreatePaymentResponse createPaymenResponse = createPaymentRequest(pan, outTradeNo, barcodeResponse.billBizInfos)
+        CreatePaymentResponse createPaymenResponse = createPaymentRequest(bill['barcode'], outTradeNo, barcodeResponse.billBizInfos)
         then:
         with(createPaymenResponse){
             status == '01' // 01成功、02失败
