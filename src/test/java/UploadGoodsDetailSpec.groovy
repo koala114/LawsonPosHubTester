@@ -12,15 +12,16 @@ import com.kargo.response.GoodsDetailResponse
 class UploadGoodsDetailSpec extends Helper {
     @Shared GoodsDetailResponse goodsDetailResponse
     @Shared BarcodeResponse barcodeResponse, barcodeYoRenResponse
-    @Shared outTradeNo
     @Shared totalFee = 0.00
-    @Shared dev, prd, items, blackItems
+    @Shared dev, items, blackItems
     @Shared LawsonPosHubService goodsClient, barcodeClient, traderefundClient, tradeconfirmClient
+    @Shared outTradeNo
 
     def setupSpec(){
         // 初始化 LawsonPosHubService 参数 https://lawson-poshub.kargotest.com;http://121.43.156.191:21001
-        dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://121.43.156.191:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        prd = ['mid':'DEFAULT', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://47.97.19.94:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
+       //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://139.196.51.187:21001', 'store_id':'208888', 'user_id':'20888801',  'pos_id':'01', 'jar_version':'1']
+        //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://47.101.50.215:21001', 'store_id':'208888', 'user_id':'20888801',  'pos_id':'01', 'jar_version':'1']
 
         // 全局out_trade_no, 所有交易相同
         goodsClient = createLawsonPosHubService(dev, '/uploadgoodsdetail')
@@ -30,12 +31,11 @@ class UploadGoodsDetailSpec extends Helper {
 
         outTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
 
-        items = ['6920459950180', '2501408063102'] // 6901028075831 黑名单商品
         //items = [] // 6901028075831 黑名单商品
 
-        def blackItem1 = jsonSlurper.parseText("{\"barcode\":\"1345597486671291400\",\"commission_sale\":\"0\",\"discount_info_list\":[],\"goods_category\":\"51\",\"kagou_sign\":\"N\",\"name\":\"黑名单1\",\"quantity\":1,\"row_no\":1,\"sell_price\":0.33,\"total_amount\":0.33,\"total_discount\":0}")
+        def blackItem1 = jsonSlurper.parseText("{\"barcode\":\"1345597486671291400\",\"commission_sale\":\"0\",\"discount_info_list\":[],\"goods_category\":\"58\",\"kagou_sign\":\"N\",\"name\":\"黑名单1\",\"quantity\":1,\"row_no\":1,\"sell_price\":0.33,\"total_amount\":0.33,\"total_discount\":0}")
         def blackItem2 = jsonSlurper.parseText("{\"barcode\":\"2501858005102\",\"commission_sale\":\"0\",\"discount_info_list\":[],\"goods_category\":\"51\",\"kagou_sign\":\"N\",\"name\":\"黑名单2\",\"quantity\":1,\"row_no\":1,\"sell_price\":0.33,\"total_amount\":0.33,\"total_discount\":0}")
-        def blackItem3 = jsonSlurper.parseText("{\"barcode\":\"4901777374461\",\"commission_sale\":\"0\",\"discount_info_list\":[{\"discount_amount\":8.00,\"discount_quantity\":2.0}],\"goods_category\":\"51\",\"kagou_sign\":\"N\",\"name\":\"三得利-196℃桃子配制酒\",\"quantity\":2,\"row_no\":3,\"sell_price\":15.9,\"total_amount\":31.80,\"total_discount\":8.00}");
+        def blackItem3 = jsonSlurper.parseText("{\"barcode\":\"78013011111111\",\"commission_sale\":\"0\",\"discount_info_list\":[{\"discount_amount\":8.00,\"discount_quantity\":2.0}],\"goods_category\":\"51\",\"kagou_sign\":\"N\",\"name\":\"三得利-196℃桃子配制酒\",\"quantity\":2,\"row_no\":3,\"sell_price\":15.9,\"total_amount\":31.80,\"total_discount\":8.00}");
         blackItems = [new OrderItem(blackItem1), new OrderItem(blackItem2), new OrderItem(blackItem3)]
         //blackItems = []
 
@@ -45,7 +45,8 @@ class UploadGoodsDetailSpec extends Helper {
 
     def "call uploadgoodsdetail without member_no"(){
         given:
-        // 商品明细
+        items = ['6923127360100', '2501408063102', '6920259700053'] // 6901028075831 黑名单商品
+        and:
         GoodsDetailRequest request = createGoodsDetailRequest(null, outTradeNo, items, blackItems)
         when:
         totalFee = request.getTotal_fee()
@@ -56,6 +57,7 @@ class UploadGoodsDetailSpec extends Helper {
             pay_code == '038'
             ret_code == '00'
             responseCode == '0000'
+            responseMessage == '交易成功完成'
         }
     }
 
@@ -72,9 +74,10 @@ class UploadGoodsDetailSpec extends Helper {
             ret_code == '00'
             pay_code == '038'
             ['1900267772339', '1900213189174'].contains(user_info.code) //YoRen测试环境会员号
+            responseMessage == '交易成功完成'
         }
         where:
-        memberNo = '391612620606353982'
+        memberNo = '391109216737792339'
     }
 
     def "call uploadgoodsdetail with member_no"(){
@@ -90,6 +93,7 @@ class UploadGoodsDetailSpec extends Helper {
             pay_code == '038'
             ret_code == '00'
             responseCode == '0000'
+            responseMessage == '交易成功完成'
             extraInfo.contains('memberAmountFree')
         }
     }
@@ -103,17 +107,25 @@ class UploadGoodsDetailSpec extends Helper {
         then:
         with(barcodeResponse){
             responseCode == '0000'
+            responseMessage == '交易成功完成'
             ret_code == '00'
             biz_type == '00' // 支付00
             pay_code == paycode
         }
         where:
         pan|paycode
-        //'911167728145959244'|'052' // QQ支付
-        //'134280065829410384'|'050' // 微信支付
-       //'287837647376519672'|'051' // 支付宝
+        //'910000000000000001'|'010' // QQ支付
+       '130535181156073375'|'050' // 微信支付
+        //'LS210032839440110269000'|'100'
+        //'0100803882792891721'|'007' // 微信支付
+       //'283712123251107120'|'051' // 支付宝
         //'77FF03120721218131'|'004' // 索迪斯
-        getUnionpayPan()|'057'
+        //getUnionpayPan()|'057'
+        //'https://www.apple.com.cn'|'023'//中百抖音
+        //'013990005507383097321210003745183'|'014'
+        //'6220204222068652830'|'057'//中百抖音
+        //'810086722461596869'|'031'//移动和包
+        //'6240105666367315102' | '027'
     }
 
     def "call confirm"(){
@@ -124,6 +136,7 @@ class UploadGoodsDetailSpec extends Helper {
         then:
         with(paymentConfirmResponse){
             responseCode == '0000'
+            responseMessage == '交易成功完成'
             ret_code == '00'
             //totalPoint > 0
             status == '1000'
@@ -138,6 +151,7 @@ class UploadGoodsDetailSpec extends Helper {
         then:
         with(paymentRefundResponse){
             responseCode == '0000'
+            responseMessage == '交易成功完成'
             biz_type == '01' // YoRen 退款01
             ret_code == '00'
             status == '2000'
@@ -146,12 +160,14 @@ class UploadGoodsDetailSpec extends Helper {
 
     def "call traderefund for payment"(){ // e支付退款的old_trade_no用e支付barcode的tradeNo
         given:
-        PaymentRefundRequest request = createPaymentRefundRequest(barcodeYoRenResponse.getPay_code(), barcodeResponse.trade_no, barcodeResponse.getTotal_fee());
+        PaymentRefundRequest request = createPaymentRefundRequest(barcodeResponse.getPay_code(), barcodeResponse.trade_no, barcodeResponse.getTotal_fee());
+        //PaymentRefundRequest request = createPaymentRefundRequest('031', '208888301534382771', 0.01);
         when:
         def paymentRefundResponse = (PaymentRefundResponse) traderefundClient.execute(request)
         then:
         with(paymentRefundResponse){
             responseCode == '0000'
+            responseMessage == '交易成功完成'
             biz_type == '00' // e支付 退款00
             ret_code == '00'
             status == '2000'

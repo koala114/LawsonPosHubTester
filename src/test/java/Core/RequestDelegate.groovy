@@ -3,12 +3,15 @@ package Core
 import com.kargo.LawsonPosHubService
 import com.kargo.internal.constants.ClientConstant
 import com.kargo.request.BarCodeRequest
+import com.kargo.request.CreatePaymentRequest
 import com.kargo.request.GoodsDetailRequest
 import com.kargo.request.detail.OrderItem
+import com.kargo.response.CreatePaymentResponse
 import com.kargo.response.ExchangeConfirmResponse
 import com.kargo.response.GoodsDetailResponse
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.PaymentConfirmResponse
+import com.kargo.response.detail.BillBizInfo
 import groovy.transform.TupleConstructor
 import com.kargo.request.detail.OrderItem
 import groovy.json.JsonSlurper
@@ -33,12 +36,19 @@ class RequestDelegate extends Helper {
         LawsonPosHubService ls = lawsonPosHubService('/uploadgoodsdetail')
         GoodsDetailRequest request = createGoodsDetailRequest(memberNo, outTradeNo, items, blackItems)
         def response = ls.execute(request)
-        return [response, request.total_fee]
+        return [response, request]
     }
 
     BarcodeResponse barCodeRequest(String memberNo, String outTradeNo, Double totalFee){
         LawsonPosHubService ls = lawsonPosHubService('/barcode')
         return ls.execute(createBarCodeRequest(memberNo, outTradeNo, totalFee))
+    }
+
+    BarcodeResponse barCodeRequest(String memberNo, String outTradeNo){
+        LawsonPosHubService ls = lawsonPosHubService('/barcode') // FFT使用该barcode接口
+        def barcodeRequest = createBarCodeRequest(memberNo, outTradeNo, null)
+        barcodeRequest.setFee_type("1")
+        return ls.execute(barcodeRequest)
     }
 
     ExchangeConfirmResponse exchangeConfirmRequest(String outTradeNo, def coupons, double payAmt, double totalFee){
@@ -49,6 +59,12 @@ class RequestDelegate extends Helper {
     PaymentConfirmResponse paymentConfirmRequest(def couponList, String memberNo, String outTradeNo, Double totalFee, Double pointAmount, Double prepaidAmount){
         LawsonPosHubService ls = lawsonPosHubService('/tradeconfirm')
         return ls.execute(createPaymentConfirmRequest(couponList, memberNo, outTradeNo, totalFee, pointAmount, prepaidAmount))
+    }
+
+    CreatePaymentResponse createPaymentRequest(String dynamicId, String outTradeNo, ArrayList<BillBizInfo> billBizInfo){
+        LawsonPosHubService ls = lawsonPosHubService('/createpayment')
+        def createPaymentRequest = createPaymentRequestt(dynamicId, outTradeNo, billBizInfo[0].bill_id, billBizInfo[0].bill_amt)
+        return ls.execute(createPaymentRequest)
     }
 
     private LawsonPosHubService lawsonPosHubService(String miyaUrl){

@@ -8,7 +8,7 @@ class QRCodeImageGen extends Helper {
     def "call QRCodeRequest"() {
         given:
         QRCodeRequest qrCodeRequest = new QRCodeRequest()
-        qrCodeRequest.setOrder_no("2030400122177503")
+        qrCodeRequest.setOrder_no("2030400122177504")
         qrCodeRequest.setPay_amt(2.50)
         qrCodeRequest.setTimestamp("1688711768157")
         when:

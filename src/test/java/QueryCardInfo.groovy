@@ -113,7 +113,8 @@ class QueryCardInfo  extends Helper {
         }
         //result.size() == 0
         where:
-        trackInfo = '996016844010007349^6955814701848;                                           '
+        //trackInfo = '996016844010007349^6955814701848;                                           '
+        trackInfo = '996016844010007340^6955814701848;                                           '
 
     }
 
@@ -140,7 +141,7 @@ class QueryCardInfo  extends Helper {
         pan | payCode | respCode | respMessage | bizType |upc
         //'133072400089601371' | null | '8044' | 'GoodsList contains blacklist goods' | null
         //getUnionpayPan()|'057'|'0000'|''|'00' |'0000000000000'
-        '996016844010007349^6955814701848;                                           ' | '045' | '0000' | 'Txn completed successfully' | '03' |'6955814701848'
+        '996016844010007341^6955814701848;                                           ' | '045' | '0000' | 'Txn completed successfully' | '03' |'6955814701848'
     }
 
     def "call barcode ePay"(){
