@@ -21,7 +21,8 @@ import spock.lang.Specification
 class FFTCreatepaymentQueryByBillNo extends Specification {
     @Shared BarcodeResponse barcodeResponse
     @Shared outTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
-    @Shared def bill = ['barcode':'B544021264255625000055803', 'bill_amt':55.8] // {"searchType":"0","searchTypeName":"用户代码","validationExp":"^\\d{10}$","remark":null,"needPwd":"N"}
+    //@Shared def bill = ['barcode':'544021264255625000055803', 'bill_amt':55.8] // {"searchType":"0","searchTypeName":"用户代码","validationExp":"^\\d{10}$","remark":null,"needPwd":"N"}
+    @Shared def bill = ['barcode':'0A70195811002403100000226800', 'bill_amt':916.5]
     @Delegate RequestDelegate requestDelegate
 
     def setup(){
