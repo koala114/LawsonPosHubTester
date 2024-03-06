@@ -22,8 +22,8 @@ class HLOKCard extends Helper {
 
     def setupSpec() {
         // 初始化 LawsonPosHubService 参数
-        env = ['mid': '00062000000', 'sessionKey': '9Y3SGFCLR2BH4T51', 'kargoUrl': 'http://121.43.156.191:21001', 'store_id': '208888', 'user_id': '00000002', 'pos_id': '01', 'jar_version': '1']
-        prd = ['mid': '00062000000', 'sessionKey': 'LAWSONJZ2NJKARGO', 'kargoUrl': 'http://47.97.19.94:21001', 'store_id': '203118', 'user_id': '20311801', 'pos_id': '01', 'jar_version': '1']
+        env = ['mid': '00062000000', 'sessionKey': '9Y3SGFCLR2BH4T51', 'kargoUrl': 'http://127.0.0.1:21001', 'store_id': '208888', 'user_id': '00000002', 'pos_id': '01', 'jar_version': '1']
+        //prd = ['mid': 'DEFAULT', 'sessionKey': 'LAWSONJZ2NJKARGO', 'kargoUrl': 'http://121.199.49.2:21001', 'store_id': '203118', 'user_id': '20311801', 'pos_id': '01', 'jar_version': '1']
 
         barcodeClient = createLawsonPosHubService(env, '/barcode')
         goodsClient = createLawsonPosHubService(env, '/uploadgoodsdetail')
@@ -86,11 +86,13 @@ class HLOKCard extends Helper {
             ret_code == '00'
             biz_type == '03'
             status == '1000'
-            pay_code == '009'
+            pay_code == payCode
             amountProcessed == String.valueOf(totalFee)
         }
         where:
-        pan = '554916216814712'
+        pan|payCode
+        '910000000000000001'|'010'
+        //'554916216814712'|'009'
     }
 
     def "call confirm"(){

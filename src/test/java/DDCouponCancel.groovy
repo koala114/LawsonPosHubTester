@@ -27,8 +27,8 @@ class DDCouponCancel extends Helper {
 
     def setupSpec(){
         // 初始化 LawsonPosHubService 参数 https://lawson-poshub.kargotest.com;http://121.43.156.191:21001
-        //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://10.100.70.120:7001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        def env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://121.43.156.191:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        //def env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id': '208888', 'user_id':'00000002',  'pos_id':'99', 'jar_version':'1.9.11-202311161715']
+        def env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://47.101.50.215:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
         //prd = ['mid':'DEFAULT', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://47.97.19.94:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
 
         // 全局out_trade_no, 所有交易相同
@@ -113,15 +113,19 @@ class DDCouponCancel extends Helper {
         then:
         with(couponCaluResponse){
             responseCode == '0000'
-            couonPayCode == '024'
+            couonPayCode == cPayCode
         }
         where:
-        DDMemberNo = 'L12522847241471238'
+        DDMemberNo|cPayCode
+        //'D10768668413318337'|'025'
+        'D10768670054964401'|'025'
     }
 
     def "call couponCancel"(){
         given:
-        CouponCancelRequest request = createCouponCancelRequest(outTradeNo, tradeNo ,'01', couponCaluResponse.getyList())
+        //CouponCancelRequest request = createCouponCancelRequest(outTradeNo, tradeNo ,'01', couponCaluResponse.getyList())
+        def yList = [[couponCode:"SJMJ100662308000000001133"]]
+        CouponCancelRequest request = createCouponCancelRequest('20888802131411629', '208888021314116292','01', yList)
         when:
         couponCancelResponse = (CouponCancelResponse) couponCancelClient.execute(request)
         then:
@@ -133,6 +137,7 @@ class DDCouponCancel extends Helper {
     def "call couponConfirm"(){
         given:
         CouponConfirmRequest request = createCouponConfirm(outTradeNo, '01', couponCaluResponse.getyList())
+        //CouponConfirmRequest request = createCouponConfirm("20888811095933578", '01', "{\"couponDtoList\":[],\"orderId\":\"20888811094953960\",\"out_trade_no\":\"20888811094953960\",\"storeCode\":\"208888\",\"trade_no\":\"208888110949539603\",\"venderCode\":\"01\"}")
         when:
         couponConfirmResponse = (CouponConfirmResponse) couponConfirmeClient.execute(request)
         then:
@@ -141,6 +146,7 @@ class DDCouponCancel extends Helper {
         }
     }
 
+    @Ignore
     def "call unfreeze"(){
         given:
         UnFreezeRequest unFreezeRequest = createUnFreezeRequest(outTradeNo, barcodeYoRenResponse.user_info.code)

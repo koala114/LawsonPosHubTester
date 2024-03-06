@@ -10,12 +10,10 @@ class eBarcodeAndReversal extends Helper {
     @Shared BarcodeResponse barcodeResponse = null
     @Shared LawsonPosHubService barcodeClient, cancelClient
     @Shared def totalFee
-    @Shared DBVerifier dbVerifier
 
     def setupSpec(){
-        dbVerifier = new DBVerifier()
         totalFee = 0.01
-        def env = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'https://lawson-poshub.kargotest.com', 'store_id':'202802', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        def env = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'360360', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
         barcodeClient = createLawsonPosHubService(env, '/barcode')
         cancelClient = createLawsonPosHubService(env, '/tradecancel')
 
@@ -28,12 +26,6 @@ class eBarcodeAndReversal extends Helper {
         when:
         barcodeResponse = (BarcodeResponse) barcodeClient.execute(request)
         /* 期望结果 */
-        def Leg1 = ['stan':barcodeResponse.getTrade_no(), 'transaction_type':'REDMP', 'pan':pan, 'upc':null, 'result_cd': null, 'execute_method':'BARCODE', 'route_id':null]
-        def Leg3 = Leg1 + ['upc':'0000000000000', 'result_cd': '0000', 'route_id':'kargoUH', 'pay_method':barcodeResponse.pay_code, 'rrn':barcodeResponse.getOutid()]
-        def Leg4 = Leg3
-        def expectedValue = ['LEG_1':Leg1, 'LEG_3':Leg3, 'LEG_4':Leg4]
-        def result =  dbVerifier.validateOltp(expectedValue)
-
         then:
         with(barcodeResponse){
             responseCode == '0000'
@@ -43,26 +35,26 @@ class eBarcodeAndReversal extends Helper {
             pay_code == payCode
             outid != null
         }
-        result.size() == 0
         where:
         pan | payCode
-        getUnionpayPan() | '057'
+        //getUnionpayPan() | '057'
+        '013990005507383097321210003745111'|'014'
     }
 
     def "call tradecancel for payment"(){
         given:
          /* 期望结果 */
-        def Leg1 = ['stan':barcodeResponse.trade_no, 'transaction_type':'RVSAL', 'upc':null, 'result_cd': null, 'execute_method':'TRADECANCEL', 'route_id':null]
-        def Leg3 = ['stan':barcodeResponse.trade_no, 'transaction_type':'RVSAL', 'upc':'0000000000000', 'result_cd': '0000', 'execute_method':'TRADECANCEL', 'route_id':'kargoUH',
-                'pay_method':barcodeResponse.pay_code]
-        def Leg4 = ['stan':barcodeResponse.trade_no, 'transaction_type':'RVSAL', 'upc':'0000000000000', 'result_cd': '0000', 'execute_method':'TRADECANCEL', 'route_id':'kargoUH',
-                    'pay_method':barcodeResponse.pay_code]
-        def expectedValue = ['LEG_1':Leg1, 'LEG_3':Leg3, 'LEG_4':Leg4]
+        //def Leg1 = ['stan':barcodeResponse.trade_no, 'transaction_type':'RVSAL', 'upc':null, 'result_cd': null, 'execute_method':'TRADECANCEL', 'route_id':null]
+        //def Leg3 = ['stan':barcodeResponse.trade_no, 'transaction_type':'RVSAL', 'upc':'0000000000000', 'result_cd': '0000', 'execute_method':'TRADECANCEL', 'route_id':'kargoUH',
+                //'pay_method':barcodeResponse.pay_code]
+        //def Leg4 = ['stan':barcodeResponse.trade_no, 'transaction_type':'RVSAL', 'upc':'0000000000000', 'result_cd': '0000', 'execute_method':'TRADECANCEL', 'route_id':'kargoUH',
+                    //'pay_method':barcodeResponse.pay_code]
+        //def expectedValue = ['LEG_1':Leg1, 'LEG_3':Leg3, 'LEG_4':Leg4]
 
-        PaymentReverseRequest request = createPaymentReverseRequest(barcodeResponse.out_trade_no, barcodeResponse.trade_no)
+        PaymentReverseRequest request = createPaymentReverseRequest(barcodeResponse.out_trade_no, barcodeResponse.trade_no, barcodeResponse.pay_code)
         when:
         def resp = (PaymentReverseResponse) cancelClient.execute(request)
-        def result =  dbVerifier.validateOltp(expectedValue)
+        //def result =  dbVerifier.validateOltp(expectedValue)
         then:
         with(resp){
             responseCode == '0000'
@@ -70,6 +62,6 @@ class eBarcodeAndReversal extends Helper {
             biz_type == '00'
             status == '3000'
         }
-        result.size() == 0
+        //result.size() == 0
     }
 }

@@ -31,9 +31,9 @@ class FastBaseline extends Helper {
 
     def setupSpec(){
         // 初始化 LawsonPosHubService 参数 https://lawson-poshub.kargotest.com, http://121.43.156.191:21001
-        env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:9000', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        //env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://121.43.156.191:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        //env = ['mid':'DEFAULT', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://47.97.19.94:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1.9-3']
+        env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+       // env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'https://apisix.kargotest.com', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        //env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'https://lawson-poshub.kargotest.com', 'store_id':'208888', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1.9-3']
 
         goodsClient = createLawsonPosHubService(env, '/uploadgoodsdetail')
         barcodeClient = createLawsonPosHubService(env, '/barcode')
@@ -81,7 +81,7 @@ class FastBaseline extends Helper {
 
     def "call unfreeze"(){  // -----> /pos/v1/pos/couponCorrection
         given:
-        UnFreezeRequest unFreezeRequest = createUnFreezeRequest("20888814142409173", "1900267772339")
+        UnFreezeRequest unFreezeRequest = createUnFreezeRequest("20888814142409174", "1900267772339")
         when:
         UnFreezeResponse unFreezeResponse = (UnFreezeResponse) unfreezeClient.execute(unFreezeRequest)
         then:
@@ -106,10 +106,10 @@ class FastBaseline extends Helper {
         }
         where:
         pan|bizType|payCode
-        '6901209322501'|'02'|'038' // 游仁会员
-        //'132720359431780134'|'00'|'050' // 微信
+        //'6901209322501'|'02'|'038' // 游仁会员
+        '832720359431780134'|'00'|'050' // 微信
         //'280891674175350197'|'00'|'051' // 支付宝
-        getUnionpayPan()|'00'|'057' // 银联
+        //getUnionpayPan()|'00'|'057' // 银联
         //'899154330517171601690000000000100108'|'01'|'032' // 阿拉丁走MiYa
         // '77FF03120721218131'|'00'|'004' // 索迪斯走MiYa
         //'996016844010007349^6955814701848;                                           '|'03' | '045' // 卡购卡
@@ -119,7 +119,7 @@ class FastBaseline extends Helper {
     def "call traderefund for payment"(){ // e支付退款的old_trade_no用e支付barcode的tradeNo
         given:
         //PaymentRefundRequest request = createPaymentRefundRequest(code, oldTradeNo, amt)
-        PaymentRefundRequest request = createPaymentRefundRequest(code, oldTradeNo, amt)
+        PaymentRefundRequest request = createPaymentRefundRequest("007", "208888021126027402", 1.99)
         when:
         def resp = (PaymentRefundResponse) traderefundClient.execute(request)
         then:
@@ -177,6 +177,123 @@ class FastBaseline extends Helper {
         with(healthCheckResponse){
             responseCode == '0000'
         }
+    }
 
+    def "call barcode for errorCode"(){
+        given:
+        BarCodeRequest request = createBarCodeRequest("134280065829410384", outTradeNo, totalFee)
+        when:
+        barcodeResponse = (BarcodeResponse) barcodeClient.execute(request)
+        barcodeRespList.add(barcodeResponse)
+        then:
+        with(barcodeResponse){
+            responseCode == totalFee.toString()
+            responseMessage ==  Message + "，如需报修请联系厂商11"
+        }
+        where:
+        totalFee|Message
+        1002|"交易已批准"
+        1003|"交易已批准"
+        1004|"交易已批准"
+        7001|"取卡"
+        7002|"取卡"
+        7003|"取卡"
+        7004|"取卡"
+        7005|"取卡"
+        7006|"取卡"
+        8001|"系统错误"
+        8002|"终端不支持该交易"
+        8003|"商户不支持该交易"
+        8004|"交易金额无效"
+        8005|"无效的 PAN 号码"
+        8007|"请求中有错误数据"
+        8008|"无效商户"
+        8010|"请求中有错误数据"
+        8011|"超时"
+        8013|"交易超出预设速度限制"
+        8014|"无效交易"
+        8015|"数据错误"
+        8016|"不支持的商户货币"
+        8017|"无终端商户关联"
+        8018|"终端未登录"
+        8021|"发卡行不可用"
+        8023|"无效身份验证"
+        8024|"终端配置不存在"
+        8025|"无效的配置下载请求"
+        8027|"无效的配置请求"
+        8028|"发卡行不支持该卡"
+        8029|"需要 PAN 或 TrackData"
+        8030|"无效的商户交易 ID"
+        8031|"店铺不支持该交易"
+        8032|"extendExpiryMonthBy 的值无效"
+        8033|"未找到路由器 ID"
+        8034|"服务器忙碌"
+        8040|"未找到原始交易"
+        8041|"作废时间限制已超过"
+        8042|"原始交易失败"
+        8043|"交易金额不匹配"
+        8044|"请求中有错误数据"
+        8045|"无效的 UPC"
+        8046|"退款时间限制已超过"
+        8047|"不支持原始交易的退款"
+        8048|"原始交易使用了不同的卡"
+        8049|"需要新的卡号"
+        8050|"缺少持卡人资料"
+        8051|"仅支持动态码交易"
+        9001|"请参阅发卡行"
+        9002|"无效商户"
+        9003|"拒绝交易"
+        9004|"交易被拒绝"
+        9005|"请求处理中"
+        9006|"交易被拒绝"
+        9007|"交易被拒绝"
+        9008|"无效的卡号"
+        9009|"无此发卡行"
+        9010|"请重新输入交易"
+        9011|"无效响应"
+        9012|"交易被拒绝"
+        9013|"疑似故障"
+        9014|"交易费不可接受"
+        9015|"无法找到原始交易"
+        9016|"交易被拒绝"
+        9017|"银行不支持"
+        9018|"卡已过期"
+        9019|"交易被拒绝"
+        9020|"交易被拒绝"
+        9021|"资金不足"
+        9022|"交易被拒绝"
+        9023|"不允许的交易"
+        9024|"疑似欺诈"
+        9025|"交易被拒绝"
+        9026|"受限制的卡"
+        9027|"交易被拒绝"
+        9028|"交易被拒绝"
+        9029|"交易被拒绝"
+        9030|"日终正在进行中"
+        9031|"交易被拒绝"
+        9032|"交易被拒绝"
+        9033|"交易被拒绝"
+        9035|"交易被拒绝"
+        9036|"交易被拒绝"
+        9037|"交易被拒绝"
+        9038|"交易被拒绝"
+        9039|"交易被拒绝"
+        9040|"交易被拒绝"
+        9051|"卡未激活"
+        9052|"卡已激活"
+        9053|"激活正在进行中"
+        9054|"此卡无法激活。请销毁卡并使用新卡。"
+        9055|"无效货币"
+        9056|"卡片可在 30 分钟后使用"
+        9057|"无效请求"
+        9058|"卡已重新发行。请激活新卡"
+        9059|"卡已重新发行。请联系店员寻求技术支持"
+        9060|"已使用的卡不允许冲正"
+        9061|"卡已经注册"
+        9062|"激活冲正时间已超过"
+        9063|"卡已重新发行"
+        9064|"卡已关闭"
+        9065|"账户资金不足"
+        100|"交易成功完成"
     }
 }

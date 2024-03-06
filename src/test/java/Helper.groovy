@@ -11,6 +11,7 @@ import com.kargo.request.PaymentConfirmRequest
 import com.kargo.request.PaymentRefundRequest
 import com.kargo.request.PaymentReverseRequest
 import com.kargo.request.QueryCardInfoRequest
+import com.kargo.request.PaymentQueryRequest
 import com.kargo.request.UnFreezeRequest
 import com.kargo.request.coupon.CouponCaluRequest
 import com.kargo.request.coupon.CouponCancelRequest
@@ -21,9 +22,7 @@ import com.kargo.request.coupon.WareReqDto
 import com.kargo.request.detail.ExchangeConfirmCoupons
 import com.kargo.request.detail.ExchangeConfirmReceive
 import com.kargo.request.detail.OrderItem
-import com.kargo.response.coupon.CoupCouponResp
-import com.kargo.response.coupon.CouponCaluResponse
-import com.kargo.response.coupon.WareShareDto
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
 import spock.lang.Shared
@@ -31,6 +30,8 @@ import spock.lang.Specification
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+
+import static java.util.TimeZone.*
 
 class Helper extends Specification {
     private static final Logger log = Logger.getLogger(Helper.class);
@@ -62,7 +63,7 @@ class Helper extends Specification {
         totalFee = totalFee - discount.sum()
         log.info("totalFee - discount = " + totalFee)
 
-        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':0, 'out_trade_no':store_id + outTradeNo,
+        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':0, 'out_trade_no':store_id + outTradeNo,
                      'pos_id':pos_id, 'pos_version':'1', 'store_id': store_id, 'total_fee':totalFee.round(2), 'user_id':user_id, 'order_items':its]
         GoodsDetailRequest request = new GoodsDetailRequest(*:paras)
         return request
@@ -80,7 +81,7 @@ class Helper extends Specification {
         totalFee = totalFee - (discount.sum()?:0.0)
         log.info("totalFee - discount = " + totalFee)
 
-        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':1, 'out_trade_no':store_id + outTradeNo,
+        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':1, 'out_trade_no':store_id + outTradeNo,
                      'pos_id':pos_id, 'pos_version':'1', 'store_id': this.store_id, 'total_fee':totalFee.round(2), 'user_id':user_id, 'order_items':its]
         if(memberNo)
             paras << [ 'member_no': memberNo]
@@ -89,15 +90,14 @@ class Helper extends Specification {
     }
 
     protected BarCodeRequest createBarCodeRequest(String dynamicId, String outTradeNo, Double totalFee){
-        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'dynamic_id': dynamicId, 'out_trade_no': store_id + outTradeNo, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix),
+        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'dynamic_id': dynamicId, 'out_trade_no': store_id + outTradeNo, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix),
                      'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'user_id':user_id, 'fee_type':0]
-
         BarCodeRequest request = new BarCodeRequest(paras);
         return request
     }
 
     protected CreatePaymentRequest createPaymentRequestt(String dynamicId, String outTradeNo, String billId, BigDecimal billAmt){
-        def paras = ['bill_id':billId, 'bill_amt':billAmt, 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'barcode': dynamicId, 'out_trade_no': store_id + outTradeNo, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix),
+        def paras = ['bill_id':billId, 'bill_amt':billAmt, 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'barcode': dynamicId, 'out_trade_no': store_id + outTradeNo, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix),
                      'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id]
 
         CreatePaymentRequest request = new CreatePaymentRequest(paras);
@@ -105,7 +105,7 @@ class Helper extends Specification {
     }
 
     protected PaymentConfirmRequest createPaymentConfirmRequest(def couponList, String memberNo, String outTradeNo, Double totalFee, Double pointAmount, Double prepaidAmount){
-        def paras = ['coupon_code':couponList, 'currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberPromotion\":\"0\",\"memberPromotionRec\":\"\",\"memberAmount\":0.0}', 'out_trade_no': store_id + outTradeNo, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix),
+        def paras = ['coupon_code':couponList, 'currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberPromotion\":\"0\",\"memberPromotionRec\":\"\",\"memberAmount\":0.0}', 'out_trade_no': store_id + outTradeNo, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix),
                      'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'user_id':user_id, 'offline_flag':'0', 'point_amount':0, 'prepaid_amount':prepaidAmount?prepaidAmount:0, 'point_amount': pointAmount?pointAmount:0]
         if (memberNo)
             paras = paras + ['member_no': memberNo]
@@ -115,15 +115,15 @@ class Helper extends Specification {
     }
 
     protected QueryCardInfoRequest createQueryCardInfoRequest(String trackInfo){
-        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'track_info':trackInfo]
+        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'track_info':trackInfo]
 
         QueryCardInfoRequest request = new QueryCardInfoRequest(paras);
         return request
     }
 
     protected PaymentRefundRequest createPaymentRefundRequest(String memberNo, String oldTradeNo){
-        def refundOutTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
-        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'member_no':memberNo, 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'old_trade_no':oldTradeNo, 'order_items':[],
+        def refundOutTradeNo = (new Date()).format("ddHHmmssSSS", getTimeZone('Asia/Shanghai'))
+        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'member_no':memberNo, 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'old_trade_no':oldTradeNo, 'order_items':[],
                      'out_trade_no': refundOutTradeNo, 'trade_no':refundOutTradeNo + tradeNoPostfix]
 
         PaymentRefundRequest request = new PaymentRefundRequest(paras);
@@ -131,8 +131,8 @@ class Helper extends Specification {
     }
 
     protected PaymentRefundRequest createPaymentRefundRequest(String code, String oldTradeNo, Double totalFee){
-        def refundOutTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
-        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'old_trade_no': oldTradeNo, 'order_items':[],
+        def refundOutTradeNo = (new Date()).format("ddHHmmssSSS", getTimeZone('Asia/Shanghai'))
+        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'old_trade_no': oldTradeNo, 'order_items':[],
                      'out_trade_no': store_id.concat(refundOutTradeNo), 'trade_no':store_id.concat(refundOutTradeNo) + tradeNoPostfix]
         if(totalFee){
             paras = paras + ['pay_code': code, 'refund_fee': totalFee]
@@ -145,17 +145,25 @@ class Helper extends Specification {
     }
 
     protected PaymentReverseRequest createPaymentReverseRequest(String outTradeNo, String tradeNo, String payCode){
-        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'out_trade_no':  store_id + outTradeNo, 'pos_id':pos_id, 'store_id':store_id, 'trade_no':tradeNo, 'user_id':user_id]
+        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'out_trade_no':  outTradeNo, 'pos_id':pos_id, 'store_id':store_id, 'trade_no':tradeNo, 'user_id':user_id]
         if(payCode)
             paras = paras + ['pay_code':payCode]
         PaymentReverseRequest request = new PaymentReverseRequest(paras)
         return request
     }
 
-    protected ExchangeConfirmRequest createExchangeConfirmRequest(String memberNo,String outTradeNo, def coupons){
+    protected PaymentQueryRequest createTradeQueryRequest(String outTradeNo, String tradeNo, String payCode){
+        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'out_trade_no':  outTradeNo, 'pos_id':pos_id, 'store_id':store_id, 'trade_no':tradeNo, 'user_id':user_id]
+        if(payCode)
+            paras = paras + ['pay_code':payCode]
+        PaymentQueryRequest request = new PaymentQueryRequest(paras)
+        return request
+    }
+
+    protected ExchangeConfirmRequest createExchangeConfirmRequest(String memberNo,String outTradeNo, def coupons, def totalFee){
         def receiveList = []
         def couponsList = []
-        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'out_trade_no':  store_id + outTradeNo, 'pos_id':pos_id, 'store_id':store_id, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix), 'user_id':user_id]
+        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'out_trade_no': outTradeNo, 'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'trade_no':outTradeNo.concat(++tradeNoPostfix), 'pay_amt':totalFee, 'user_id':user_id]
         //def paras = ['dt':'2023-07-10 19:05:38', 'out_trade_no':  20188201148821, 'pay_amt':6.90, 'pos_id':'01', 'store_id':'201882', 'total_fee':6.90, 'trade_no':'2018820114882103', 'user_id':'20188201']
 
         if(memberNo)
@@ -164,43 +172,45 @@ class Helper extends Specification {
         if(coupons){
             def amt = 0.0
             // 有券号时（code）即兑换业务，否则撤销业务
-            def couponsJson = jsonSlurper.parseText(coupons)
-            couponsJson.each{
+            //def couponsJson = jsonSlurper.parseText(coupons)
+            coupons.each{
                 ExchangeConfirmCoupons es = new ExchangeConfirmCoupons(['amt':it.amt, 'code': it.code])
                 ExchangeConfirmReceive er = new ExchangeConfirmReceive(['amt':it.amt, 'code': it.code])
                 amt = amt + it.amt
-                paras['pay_amt'] = amt
-                paras['total_fee'] = amt
+                paras['pay_amt'] = amt // 阿拉订券抵扣的金额;total_fee是订单金额
+                //paras['total_fee'] = amt
 
                 paras = paras + ['receive':receiveList<<er, 'coupons':couponsList<<es]
             }
         }
+        else
+            paras['pay_amt'] = payAmt // 取消兑换的时候pay_amt传券的金额，多张券累加
         ExchangeConfirmRequest request = new ExchangeConfirmRequest(paras)
         return request
     }
 
     protected UnFreezeRequest createUnFreezeRequest(String outTradeNo, String memberNo){
-        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'out_trade_no':  store_id + outTradeNo, 'pos_id':pos_id, 'store_id':store_id,
+        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'out_trade_no':  store_id + outTradeNo, 'pos_id':pos_id, 'store_id':store_id,
                      'user_id':user_id, 'member_no': memberNo]
         UnFreezeRequest request = new UnFreezeRequest(paras)
         return request
     }
 
     protected HlOkCardPayRequest createHlOkCardPayRequest(String dynamicId, String outTradeNo, Double totalFee){
-        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'dynamic_id':dynamicId, 'out_trade_no': store_id + outTradeNo , 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix), 'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'user_id':user_id, 'accessCode':'MDAxBNMNyYuKEA7KUs48Tfnhvc7HJdNaTuf+cYot6vubfaqFwByhaClED3Sh/j9/cLF/ulVRBVSrJhuufhcqSxe90aDQwUfOMz21y0t/q+cLj6kcIy4a50fzK+HD0tnpMZvXTIthRpRdi71nXBdVYLvd+q/SD9kzYeITkxl/d7RfIybCTzEb']
+        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'dynamic_id':dynamicId, 'out_trade_no': store_id + outTradeNo , 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix), 'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'user_id':user_id, 'accessCode':'MDAxBNMNyYuKEA7KUs48Tfnhvc7HJdNaTuf+cYot6vubfaqFwByhaClED3Sh/j9/cLF/ulVRBVSrJhuufhcqSxe90aDQwUfOMz21y0t/q+cLj6kcIy4a50fzK+HD0tnpMZvXTIthRpRdi71nXBdVYLvd+q/SD9kzYeITkxl/d7RfIybCTzEb']
         HlOkCardPayRequest request = new HlOkCardPayRequest(paras)
         return request
     }
 
     protected HlOkCardCancelRequest createHlOkCardCancelRequest(String outTradeNo, String tradeNo, Double totalFee){
-        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'pay_code':'009', 'out_trade_no': outTradeNo, 'trade_no':tradeNo, 'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'user_id':user_id, 'accessCode':'MDAxBNMNyYuKEA7KUs48Tfnhvc7HJdNaTuf+cYot6vubfaqFwByhaClED3Sh/j9/cLF/ulVRBVSrJhuufhcqSxe90aDQwUfOMz21y0t/q+cLj6kcIy4a50fzK+HD0tnpMZvXTIthRpRdi71nXBdVYLvd+q/SD9kzYeITkxl/d7RfIybCTzEb']
+        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'pay_code':'009', 'out_trade_no': outTradeNo, 'trade_no':tradeNo, 'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'user_id':user_id, 'accessCode':'MDAxBNMNyYuKEA7KUs48Tfnhvc7HJdNaTuf+cYot6vubfaqFwByhaClED3Sh/j9/cLF/ulVRBVSrJhuufhcqSxe90aDQwUfOMz21y0t/q+cLj6kcIy4a50fzK+HD0tnpMZvXTIthRpRdi71nXBdVYLvd+q/SD9kzYeITkxl/d7RfIybCTzEb']
         HlOkCardCancelRequest request = new HlOkCardCancelRequest(paras)
         return request
     }
 
     protected HlOkCardRefundRequest createHlOkCardRefundRequest(String oldTradeNo, String totalFee){
-        def refundOutTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
-        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Shanghai')), 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'old_trade_no':oldTradeNo, 'order_items':[],
+        def refundOutTradeNo = (new Date()).format("ddHHmmssSSS", getTimeZone('Asia/Shanghai'))
+        def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'old_trade_no':oldTradeNo, 'order_items':[],
                      'out_trade_no': refundOutTradeNo, 'trade_no':refundOutTradeNo + tradeNoPostfix, 'refund_fee': Double.valueOf(totalFee)]
 
         HlOkCardRefundRequest request = new HlOkCardRefundRequest(paras);
@@ -208,10 +218,10 @@ class Helper extends Specification {
     }
 
     protected CouponRefundReqeust createCouponRefundReqeust(String oldTradeNo, String outTradeNo, String vanderCode, def yList){
-        def refundTradeNo= (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
+        def refundTradeNo= (new Date()).format("ddHHmmssSSS", getTimeZone('Asia/Shanghai'))
         def couponCodeList = []
         yList.each{
-            couponCodeList << ['couponCode':it.couponCode, 'orderId':store_id.concat(outTradeNo)]
+            couponCodeList << ['couponCode': it.couponCode, 'orderId':store_id.concat(outTradeNo)]
         }
         def paras = ['old_trade_no':oldTradeNo, 'storeCode':store_id, 'venderCode':vanderCode, 'orderUseCoupsReqs':couponCodeList,
                      'orderAction':0, 'orderAction':0, 'out_trade_no':store_id.concat(refundTradeNo), 'trade_no':store_id.concat(refundTradeNo).concat(++tradeNoPostfix),
@@ -227,7 +237,7 @@ class Helper extends Specification {
             couponCodeList << it.couponCode
         }
         def paras = ['venderCode':vanderCode, 'couponCodeList':couponCodeList,
-                     'out_trade_no': outTradeNo, 'trade_no':tradeNo]
+                     'out_trade_no': store_id + outTradeNo, 'trade_no':tradeNo]
 
         CouponCancelRequest request = new CouponCancelRequest(paras)
         return request
@@ -275,10 +285,10 @@ class Helper extends Specification {
     private createItems(def barcodes, def blackItems){
         def i = []
         def items = ['2501409044100': jsonSlurper.parseText('{"barcode":"2501409044100","commission_sale":"0","discount_info_list":[],"goods_category":"02","kagou_sign":"N","name":"火腿鸡蛋三明治 1便","quantity":1,"row_no":1,"sell_price":7.5,"total_amount":7.50,"total_discount":0}')]
-        items << ['2501408322100': jsonSlurper.parseText('{"barcode":"2501408322100","commission_sale":"0", "discount_info_list":[],"goods_category":"07","kagou_sign":"N","name":"香辣粉丝包","quantity":1.000,"row_no":1,"sell_price":2.50,"total_amount":2.50,"total_discount":0}')]
-        items << ['6920459950180': jsonSlurper.parseText('{"barcode":"6920459950180","commission_sale":"0","discount_info_list":[{"discount_amount":6.00,"discount_quantity":2.0}],"goods_category":"18","kagou_sign":"N","name":"贝纳颂咖啡拿铁","quantity":2,"row_no":1,"sell_price":7,"total_amount":14.00,"total_discount":6.00}')]
+        items << ['6923127360100': jsonSlurper.parseText('{"barcode":"2501408322100","commission_sale":"0", "discount_info_list":[],"goods_category":"07","kagou_sign":"N","name":"香辣粉丝包","quantity":1.000,"row_no":1,"sell_price":2.50,"total_amount":2.50,"total_discount":0}')]
+        items << ['6920459950180': jsonSlurper.parseText('{"barcode":"6920459950180","commission_sale":"0","discount_info_list":[{"discount_amount":6.00,"discount_quantity":2.0}],"goods_category":"18","kagou_sign":"N","name":"贝纳颂咖啡拿铁","quantity":30,"row_no":1,"sell_price":7,"total_amount":14,"total_discount":6.00}')]
         items << ['6902538008548': jsonSlurper.parseText('{"barcode":"6902538008548","commission_sale":"0","discount_info_list":[{"discount_amount":5.90,"discount_quantity":1.0}],"goods_category":"17","kagou_sign":"N","name":"达能优白动植蛋白乳饮拿铁味","quantity":1,"row_no":2,"sell_price":9.9,"total_amount":9.90,"total_discount":5.90}')]
-        items << ['2501408063102': jsonSlurper.parseText('{"barcode":"2501408063102","commission_sale":"0","discount_info_list":[],"goods_category":"01","kagou_sign":"N","name":"臻享饭团(纯牛肉汉堡)1便","quantity":1,"row_no":1,"sell_price":8.9,"total_amount":8.90,"total_discount":0}')]
+        items << ['2501408063102': jsonSlurper.parseText('{"barcode":"2501408063102","commission_sale":"0","discount_info_list":[],"goods_category":"01","kagou_sign":"N","name":"臻享饭团(纯牛肉汉堡)1便","quantity":1,"row_no":1,"sell_price":8.9,"total_amount":8.9,"total_discount":0}')]
         items << ['6920259700053': jsonSlurper.parseText('{"barcode":"6920259700053","commission_sale":"0","discount_info_list":[],"goods_category":"42","kagou_sign":"N","name":"罗森可充气打火机","quantity":1,"row_no":1,"sell_price":3,"total_amount":3.00,"total_discount":0}')]
         // 黑名单商品
         items << ['6901028075831': jsonSlurper.parseText('{"barcode":"6901028075831","commission_sale":"0","discount_info_list":[],"goods_category":"56","kagou_sign":"N","name":"红双喜(硬8mg)","quantity":1,"row_no":1,"sell_price":11,"total_amount":11.00,"total_discount":0}')]

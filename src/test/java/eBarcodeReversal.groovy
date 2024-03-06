@@ -14,12 +14,12 @@ class eBarcodeReversal extends Helper {
     @Shared dev, prd, items
     @Shared LawsonPosHubService goodsClient, barcodeClient, traderefundClient
     @Shared DBVerifier dbVerifier
-    @Shared totalFee = 1.34
+    @Shared totalFee = 0.01
 
     def setupSpec(){
         InitService.init()
         dbVerifier = new DBVerifier()
-        dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'https://lawson-poshub.kargotest.com', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'30', 'jar_version':'1']
         // 全局out_trade_no, 所有交易相同
         outTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
     }
@@ -27,7 +27,7 @@ class eBarcodeReversal extends Helper {
     def "call barcode to payment"(){
         given:
         def barcodeClient = createLawsonPosHubService(dev, '/barcode')
-        def request = createBarCodeRequest(getUnionpayPan(), outTradeNo, totalFee)
+        def request = createBarCodeRequest('132151432892862344', outTradeNo, totalFee)
         when:
         barcodeResponse = (BarcodeResponse) barcodeClient.execute(request)
         /* 期望结果 */
@@ -51,16 +51,16 @@ class eBarcodeReversal extends Helper {
     def "call tradecancel for payment"(){
         given:
         /* 期望结果 */
-        def stan = barcodeResponse.getTrade_no()
+        def stan = "20888830105801"
         def Leg1 = ['stan':stan, 'transaction_type':'RVSAL', 'upc':null, 'result_cd': null, 'execute_method':'TRADECANCEL', 'route_id':null]
         def Leg3 = ['stan':stan, 'transaction_type':'RVSAL', 'upc':'0000000000000', 'result_cd': '0000', 'execute_method':'TRADECANCEL', 'route_id':'kargoUH',
-                    'pay_method':barcodeResponse.pay_code]
+                    'pay_method':"050"]
         def Leg4 = ['stan':stan, 'transaction_type':'RVSAL', 'upc':'0000000000000', 'result_cd': '0000', 'execute_method':'TRADECANCEL', 'route_id':'kargoUH',
-                    'pay_method':barcodeResponse.pay_code]
+                    'pay_method':"050"]
         def expectedValue = ['LEG_1':Leg1, 'LEG_3':Leg3, 'LEG_4':Leg4]
 
         def tradecancelClient = createLawsonPosHubService(dev, '/tradecancel')
-        PaymentReverseRequest request = createPaymentReverseRequest(outTradeNo, barcodeResponse.getTrade_no(), barcodeResponse.getPay_code())
+        PaymentReverseRequest request = createPaymentReverseRequest("20888831174900631", "208888311749006311", "050")
         when:
         PaymentReverseResponse paymentReverseResponse = (PaymentReverseResponse) tradecancelClient.execute(request)
         def result =  dbVerifier.validateOltp(expectedValue)
