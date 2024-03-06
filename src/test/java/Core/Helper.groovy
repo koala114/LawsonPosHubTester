@@ -17,10 +17,10 @@ import java.util.regex.Pattern
 
 import static java.util.TimeZone.getTimeZone
 
-class Helper extends Specification {
+class Helper {
     private static final Logger log = Logger.getLogger(Helper.class);
     @Shared members = ['13818595461':'1900267772339']
-    @Shared String mid, store_id, pos_id, kargoUrl, sessionKey, user_id
+    String mid, store_id, pos_id, kargoUrl, sessionKey, user_id, jar_version
     @Shared String tradeNoPostfix = 0
     @Shared jsonSlurper = new JsonSlurper()
 
@@ -65,10 +65,10 @@ class Helper extends Specification {
         totalFee = totalFee - (discount.sum()?:0.0)
         log.info("totalFee - discount = " + totalFee)
 
-        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':1, 'out_trade_no':store_id + outTradeNo,
-                     'pos_id':pos_id, 'pos_version':'1', 'store_id': this.store_id, 'total_fee':totalFee.round(2), 'user_id':user_id, 'order_items':its]
+        def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':0, 'out_trade_no':store_id + outTradeNo,
+                     'pos_id':pos_id, 'pos_version':jar_version, 'store_id': this.store_id, 'total_fee':totalFee.round(2), 'user_id':user_id, 'order_items':its]
         if(memberNo)
-            paras << [ 'member_no': memberNo]
+            paras << [ 'member_no': memberNo, 'modify_flag': 1]
         GoodsDetailRequest request = new GoodsDetailRequest(*:paras)
         return request
     }
@@ -277,7 +277,9 @@ class Helper extends Specification {
 //        i << new OrderItem(*:tmp)
 
         items.each {k, v -> if(k in barcodes) i << new OrderItem(*:v)}
-        
+
+        if(!(barcodes instanceof ArrayList) )
+            i << new OrderItem(*:barcodes)
         return i + blackItems
     }
 
