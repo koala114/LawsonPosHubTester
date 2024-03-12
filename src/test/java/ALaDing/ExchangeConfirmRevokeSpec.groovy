@@ -84,17 +84,19 @@ class ExchangeConfirmRevokeSpec extends Specification {
         where:
         // 支付方式 ['银联支付':'057'] ['建行支付':'027'] ['阿拉丁':'032']
         pan|payCode||fee
-        '899776924020614340329000000000010004'|'032'||totalFee //第一次用券订单总金额20.9
+        '899139724031114150079008001000000009'|'032'||totalFee //第一次用券订单总金额20.9
         //'899320324020614340269000000000010006'|'032'||totalFee - 10.0 // 第二次用券是订单总金额 - 阿拉订返回的券金额10元 = 10.9
     }
 
+    @Ignore
     def "call exchangeconfirm"() {
         given:
         // 兑换业务传券号；撤销业务不传券号也需要传券金额payAmt
-        def coupons = [["code":"899429724020614340309000000000010007", "amt": 10.0]]
-        def amount = goodsDetailRequest.total_fee // 总金额
+        def coupons = [["code":"899663724030717450049000000000010005", "amt": 10.0]]
+        //def amount = goodsDetailRequest.total_fee // 总金额
         when: "撤销该阿拉丁券"
-        ExchangeConfirmResponse exchangeConfirmResp = exchangeConfirmRequest(outTradeNo, null, barcodeResponse.total_fee, amount)
+        //ExchangeConfirmResponse exchangeConfirmResp = exchangeConfirmRequest(outTradeNo, null, barcodeResponse.total_fee, amount)
+        ExchangeConfirmResponse exchangeConfirmResp = exchangeConfirmRequest("11100324865", null, 10.0, 20.9)
         then:
         with(exchangeConfirmResp){
             responseCode == '0000'

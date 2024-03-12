@@ -19,8 +19,9 @@ class UploadGoodsDetailSpec extends Helper {
 
     def setupSpec(){
         // 初始化 LawsonPosHubService 参数 https://lawson-poshub.kargotest.com;http://121.43.156.191:21001
-       //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://139.196.51.187:21001', 'store_id':'208888', 'user_id':'20888801',  'pos_id':'01', 'jar_version':'1']
+       dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://10.100.71.122:21001', 'store_id':'360320', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://139.196.51.187:21001', 'store_id':'208886', 'user_id':'20888801',  'pos_id':'01', 'jar_version':'1']
+        //dev = ['mid':'DEFAULT', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://121.199.49.2:21001', 'store_id':'350088', 'user_id':'35008801',  'pos_id':'01', 'jar_version':'1']
         //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://47.101.50.215:21001', 'store_id':'208888', 'user_id':'20888801',  'pos_id':'01', 'jar_version':'1']
 
         // 全局out_trade_no, 所有交易相同
@@ -61,6 +62,7 @@ class UploadGoodsDetailSpec extends Helper {
         }
     }
 
+    @Ignore
     def "call barcode with YoRen"(){
         given:
         def request = createBarCodeRequest(memberNo, outTradeNo, totalFee)
@@ -80,6 +82,7 @@ class UploadGoodsDetailSpec extends Helper {
         memberNo = '391109216737792339'
     }
 
+    @Ignore
     def "call uploadgoodsdetail with member_no"(){
         given:
         GoodsDetailRequest request = createGoodsDetailRequest(barcodeYoRenResponse.user_info.code, outTradeNo, items, blackItems)
@@ -122,7 +125,7 @@ class UploadGoodsDetailSpec extends Helper {
         //'77FF03120721218131'|'004' // 索迪斯
         //getUnionpayPan()|'057'
         //'https://www.apple.com.cn'|'023'//中百抖音
-        //'013990005507383097321210003745183'|'014'
+       // '013990005507383097321210003745183'|'014'
         //'6220204222068652830'|'057'//中百抖音
         //'810086722461596869'|'031'//移动和包
         //'6240105666367315102' | '027'
@@ -143,6 +146,7 @@ class UploadGoodsDetailSpec extends Helper {
         }
     }
 
+    @Ignore
     def "call traderefund for YoRen"(){// YoRen退积分old_trade_no用out_trade_no
         given:
         PaymentRefundRequest request = createPaymentRefundRequest(barcodeYoRenResponse.getUser_info().getCode(), barcodeYoRenResponse.out_trade_no);

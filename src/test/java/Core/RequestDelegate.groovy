@@ -11,6 +11,7 @@ import com.kargo.response.ExchangeConfirmResponse
 import com.kargo.response.GoodsDetailResponse
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.PaymentConfirmResponse
+import com.kargo.response.PaymentRefundResponse
 import com.kargo.response.detail.BillBizInfo
 import groovy.transform.TupleConstructor
 import com.kargo.request.detail.OrderItem
@@ -72,6 +73,12 @@ class RequestDelegate extends Helper {
         LawsonPosHubService ls = lawsonPosHubService('/createpayment')
         def createPaymentRequest = createPaymentRequestt(dynamicId, outTradeNo, billBizInfo[0].bill_id, billBizInfo[0].bill_amt)
         return ls.execute(createPaymentRequest)
+    }
+
+    PaymentRefundResponse paymentRefundRequest(String code, String oldTradeNo, Double totalFee){
+        LawsonPosHubService ls = lawsonPosHubService('/traderefund')
+        def paymentRefundRequest = createPaymentRefundRequest(code, oldTradeNo, totalFee)
+        return ls.execute(paymentRefundRequest)
     }
 
     private LawsonPosHubService lawsonPosHubService(String miyaUrl){
