@@ -8,9 +8,9 @@ import com.kargo.request.detail.ExchangeConfirmCoupons
 import com.kargo.request.detail.ExchangeConfirmReceive
 import com.kargo.request.detail.OrderItem
 import groovy.json.JsonSlurper
+import groovy.sql.Sql
 import org.apache.log4j.Logger
 import spock.lang.Shared
-import spock.lang.Specification
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -21,7 +21,7 @@ class Helper {
     private static final Logger log = Logger.getLogger(Helper.class);
     @Shared members = ['13818595461':'1900267772339']
     String mid, store_id, pos_id, kargoUrl, sessionKey, user_id, jar_version
-    @Shared String tradeNoPostfix = 0
+    static String tradeNoPostfix = 0
     @Shared jsonSlurper = new JsonSlurper()
 
     protected LawsonPosHubService createLawsonPosHubService(def env, String miyaUrl){

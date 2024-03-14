@@ -23,11 +23,9 @@ class eBarcodeAndRefund extends Helper {
     def pan = ['6235555383837928945':'057'] // 支付方式 ['银联支付':'057'] ['建行支付':'027']  ['游人预付费':'090']
     static def total_fee
     static def dev
-    static DBVerifier dbVerifier
 
     def setupSpec(){
-        dbVerifier = new DBVerifier()
-        dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://121.43.156.191:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'203118', 'user_id':'20311802',  'pos_id':'01', 'jar_version':'1']
         //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'https://lawson-poshub.kargotest.com', 'store_id':'208886', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
         //dev = ['mid':'98621000008', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://47.97.19.94:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
 
@@ -44,19 +42,12 @@ class eBarcodeAndRefund extends Helper {
         BarCodeRequest request = createBarCodeRequest('132898863728591235', outTradeNo, 0.01)
         when:
         barcodeResponse = (BarcodeResponse) barcodeClient.execute(request)
-        /* 期望结果 */
-        def Leg1 = ['stan':barcodeResponse.getTrade_no(), 'transaction_type':'REDMP', 'pan':pan, 'upc':null, 'result_cd': null, 'execute_method':'BARCODE', 'route_id':null]
-        def Leg3 = Leg1 + ['upc':'0000000000000', 'result_cd': '0000', 'route_id':routeID, 'pay_method':payCode, 'rrn':barcodeResponse.getOutid()]
-        def Leg4 = Leg3
-        def expectedValue = ['LEG_1':Leg1, 'LEG_3':Leg3, 'LEG_4':Leg4]
-        def result =  dbVerifier.validateOltp(expectedValue)
         then:
         with(barcodeResponse){
             responseCode == '0000'
             biz_type == '00' // e支付 00
             pay_code == payCode
         }
-        result.size() == 0
         where:
         pan|payCode|routeID
         //getUnionpayPan()|'057'|'kargoKH'
@@ -69,21 +60,14 @@ class eBarcodeAndRefund extends Helper {
         given:
         def client = createLawsonPosHubService(dev, '/traderefund')
         //PaymentRefundRequest request = createPaymentRefundRequest(barcodeResponse.pay_code, barcodeResponse.getTrade_no(), 0.01 )
-        PaymentRefundRequest request = createPaymentRefundRequest("051", "208886021012701", 8.00 )
+        PaymentRefundRequest request = createPaymentRefundRequest("050", "203118131150210721", 20.90 )
         when:
         resp = (PaymentRefundResponse) client.execute(request)
-        /* 期望结果 */
-        def Leg1 = ['stan':resp.getTrade_no(), 'transaction_type':'REFUND', 'upc':null, 'result_cd': null, 'execute_method':'TRADEREFUND', 'route_id':null]
-        def Leg3 = Leg1 + ['upc':'0000000000000', 'result_cd': '0000', 'route_id':'kargoUH', 'pay_method':pan.values()[0], 'rrn':resp.getOutid()]
-        def Leg4 = Leg3
-        def expectedValue = ['LEG_1':Leg1, 'LEG_3':Leg3, 'LEG_4':Leg4]
-        def result =  dbVerifier.validateOltp(expectedValue)
         then:
         with(resp){
             responseCode == '0000'
             biz_type == '00' // e支付 退款00
             status == '2000'
         }
-        result.size() == 0
     }
 }

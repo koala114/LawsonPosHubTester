@@ -13,6 +13,7 @@ import com.kargo.response.BarcodeResponse
 import com.kargo.response.PaymentConfirmResponse
 import com.kargo.response.PaymentRefundResponse
 import com.kargo.response.detail.BillBizInfo
+import groovy.sql.Sql
 import groovy.transform.TupleConstructor
 import com.kargo.request.detail.OrderItem
 import groovy.json.JsonSlurper
@@ -66,6 +67,7 @@ class RequestDelegate extends Helper {
 
     PaymentConfirmResponse paymentConfirmRequest(def couponList, String memberNo, String outTradeNo, Double totalFee, Double pointAmount, Double prepaidAmount){
         LawsonPosHubService ls = lawsonPosHubService('/tradeconfirm')
+
         return ls.execute(createPaymentConfirmRequest(couponList, memberNo, outTradeNo, totalFee, pointAmount, prepaidAmount))
     }
 
@@ -85,4 +87,9 @@ class RequestDelegate extends Helper {
         return new LawsonPosHubService(mid, store_id, pos_id, kargoUrl, sessionKey, miyaUrl, "", "", "pay")
     }
 
+    public DBConnector(){
+        Sql sql
+        sql = Sql.newInstance("jdbc:mysql://47.101.50.215:13306/lawson_hub?autoReconnect=true&useUnicode=true&characterEncoding=utf8",
+                "root", "karGo!23456", "com.mysql.jdbc.Driver")
+    }
 }

@@ -13,7 +13,7 @@ class eBarcodeAndReversal extends Helper {
 
     def setupSpec(){
         totalFee = 0.01
-        def env = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'360360', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
+        def env = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
         barcodeClient = createLawsonPosHubService(env, '/barcode')
         cancelClient = createLawsonPosHubService(env, '/tradecancel')
 
@@ -51,7 +51,8 @@ class eBarcodeAndReversal extends Helper {
                     //'pay_method':barcodeResponse.pay_code]
         //def expectedValue = ['LEG_1':Leg1, 'LEG_3':Leg3, 'LEG_4':Leg4]
 
-        PaymentReverseRequest request = createPaymentReverseRequest(barcodeResponse.out_trade_no, barcodeResponse.trade_no, barcodeResponse.pay_code)
+        //PaymentReverseRequest request = createPaymentReverseRequest(barcodeResponse.out_trade_no, barcodeResponse.trade_no, barcodeResponse.pay_code)
+        PaymentReverseRequest request = createPaymentReverseRequest('208888240314153001', '20888824031415300102', '051')
         when:
         def resp = (PaymentReverseResponse) cancelClient.execute(request)
         //def result =  dbVerifier.validateOltp(expectedValue)

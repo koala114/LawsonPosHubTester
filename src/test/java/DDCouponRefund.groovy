@@ -44,7 +44,7 @@ class DDCouponRefund extends Helper {
     def setupSpec() {
         // 初始化 LawsonPosHubService 参数 https://lawson-poshub.kargotest.com;http://121.43.156.191:21001
         //dev = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://10.100.70.120:7001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
-        def env = ['mid': 'DEFAULT', 'sessionKey': '9Y3SGFCLR2BH4T51', 'kargoUrl': 'http://121.43.156.191:21001', 'store_id': '208888', 'user_id': '00000002', 'pos_id': '01', 'jar_version': '1']
+        def env = ['mid': 'DEFAULT', 'sessionKey': '9Y3SGFCLR2BH4T51', 'kargoUrl': 'http://47.101.50.215:21001', 'store_id': '208888', 'user_id': '00000002', 'pos_id': '01', 'jar_version': '1']
         // def env = ['mid':'DEFAULT', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://10.100.70.129:7001', 'store_id':'208888', 'user_id':'00000002',  'pos_id':'01', 'jar_version':'1']
         //prd = ['mid':'DEFAULT', 'sessionKey':'LAWSONJZ2NJKARGO', 'kargoUrl':'http://47.97.19.94:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
 
@@ -155,7 +155,7 @@ class DDCouponRefund extends Helper {
         given:
         //CouponRefundReqeust request = createCouponRefundReqeust(couponCaluRequest.trade_no, outTradeNo, couponCaluRequest.venderCode, couponCaluResponse.getyList())
         def yList = [[couponCode:"SJMJ100662308000000001133"]]
-        CouponRefundReqeust request = createCouponRefundReqeust('208888021314116292', '20888802131411629', '01', yList)
+        CouponRefundReqeust request = createCouponRefundReqeust('20888831100721', '20888802131411629', '01', yList)
         when:
         couponRefundResponse = (CouponRefundResponse) couponRefundClient.execute(request)
         then:

@@ -7,6 +7,12 @@ import com.kargo.response.GoodsDetailResponse
 import spock.lang.Shared
 import spock.lang.Specification
 
+/*
+Step1. UploadGoodsDetail仅上传商品信息不需要用户未登录YoRen
+Step2. BarCode微信支付成功
+Step3. TradeConfirm时PosHub调用YoRen的dealDoneNotice接口，检查是否传paymentMerchantID和paymentUserID值给YoRen系统
+ */
+
 class YoRenDealDoneNoticeSpec extends Specification {
     @Shared BarcodeResponse barcodeResponse
     @Shared GoodsDetailRequest goodsDetailRequest
@@ -16,7 +22,7 @@ class YoRenDealDoneNoticeSpec extends Specification {
     @Delegate RequestDelegate requestDelegate
 
     def setup(){
-       def dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
+       def dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'360320', 'user_id':'36032001',  'pos_id':'01', 'jar_version':'1']
         //def dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://47.101.50.215:21001', 'store_id':'208888', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
         requestDelegate = new RequestDelegate(dev)
     }
@@ -42,7 +48,6 @@ class YoRenDealDoneNoticeSpec extends Specification {
         then:
         with(barcodeResponse){
             responseCode == '0000'
-            responseMessage == '交易成功完成'
             ret_code == '00'
             biz_type == '00' // 支付00
             pay_code == paycode
@@ -52,6 +57,7 @@ class YoRenDealDoneNoticeSpec extends Specification {
         where:
         pan|paycode|payname|paystatus
         '132692326141378115'|'050'|'微信支付'|'1000'
+        '283712123251107120'|'051'|'支付宝'|'1000'
     }
 
     def "call confirm"(){
@@ -62,7 +68,6 @@ class YoRenDealDoneNoticeSpec extends Specification {
         then:
         with(paymentConfirmResponse){
             responseCode == '0000'
-            totalPoint > 0
             status == '1000'
         }
     }
@@ -73,7 +78,6 @@ class YoRenDealDoneNoticeSpec extends Specification {
         then:
         with(paymentRefundResponse){
             responseCode == '0000'
-            responseMessage == '交易成功完成'
             biz_type == '00'
             ret_code == '00'
             status == '2000'

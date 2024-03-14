@@ -4,6 +4,8 @@ import Core.RequestDelegate
 import com.kargo.LawsonPosHubService
 import com.kargo.request.GoodsDetailRequest
 import com.kargo.response.BarcodeResponse
+import com.sun.scenario.effect.impl.sw.java.JSWBlend_SRC_OUTPeer
+import groovy.sql.Sql
 import spock.lang.*
 import com.kargo.response.GoodsDetailResponse
 
@@ -14,6 +16,7 @@ import com.kargo.response.GoodsDetailResponse
  */
 class ZhongBaiCodeSpec extends Specification {
     @Shared totalFee = 0.00
+    @Shared Sql sql
     @Shared items, blackItems
     @Shared GoodsDetailRequest goodsDetailRequest
     @Shared outTradeNo = (new Date()).format("ddHHmmssSSS", TimeZone.getTimeZone('Asia/Shanghai'))
@@ -63,13 +66,22 @@ class ZhongBaiCodeSpec extends Specification {
 
     def "call confirm"() {
         given:
+        sql = DBConnector();
         def amount = goodsDetailRequest.total_fee // 总金额
         when: "Request ZhongBai api service 101 with useFlag=1"
         def paymentConfirmResponse = paymentConfirmRequest([], null, outTradeNo, totalFee, 0, 0)
+        def payCode = sql.rows('select route_id, pay_method from oltp_txn_log_digital where out_trade_no=:otn and leg=:leg and execute_method=:method', otn:paymentConfirmResponse.out_trade_no, leg:'LEG_3', method:'TRADECONFIRM')
         then:
         with(paymentConfirmResponse) {
             responseCode == '0000'
             status == '1000'
         }
+        and: "Check if tradeconfirm is send to ZHONGBAI"
+        payCode[0]['pay_method'] == '006'
+        payCode[0]['route_id'] == 'zhongbaii'
+    }
+
+    def cleanupSpec() {
+        sql.close()
     }
 }
