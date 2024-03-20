@@ -35,18 +35,18 @@ class Helper {
         return new LawsonPosHubService(mid, store_id, pos_id, kargoUrl, sessionKey, miyaUrl, "", "", "pay")
     }
 
-    protected GoodsDetailRequest createGoodsDetailRequest(String outTradeNo, OrderItem item){
+    protected GoodsDetailRequest createGoodsDetailRequestString(outTradeNo, OrderItem item){
         def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':0, 'out_trade_no':store_id + outTradeNo,
                      'pos_id':pos_id, 'pos_version':'1', 'store_id': store_id, 'total_fee':item.total_amount, 'user_id':user_id, 'order_items':[item]]
         GoodsDetailRequest request = new GoodsDetailRequest(*:paras)
         return request
     }
 
-    protected GoodsDetailRequest createGoodsDetailRequest(String memberNo, String outTradeNo, def items, def blackItems){
+    protected GoodsDetailRequest createGoodsDetailRequest(String memberNo, String outTradeNo, def items){
         def totalFee = 0.0
         def discount = []
 
-        def its = createItems(items, blackItems)
+        def its = createItems(items)
         its.each {totalFee =it.quantity*it.sell_price + totalFee; return totalFee}
         log.info("totalFee is " + totalFee)
         its.each {discount = it.discount_info_list.discount_amount + discount}
@@ -248,9 +248,9 @@ class Helper {
         return request
     }
 
-    private createItems(def barcodes, def blackItems){
+    private createItems(def barcodes){
         def i = []
-        def items = ['2501409044100': jsonSlurper.parseText('{"barcode":"2501409044100","commission_sale":"0","discount_info_list":[],"goods_category":"02","kagou_sign":"N","name":"火腿鸡蛋三明治 1便","quantity":1,"row_no":1,"sell_price":7.5,"total_amount":7.50,"total_discount":0}')]
+        def items = ['6921168509256': jsonSlurper.parseText('{"barcode":"6921168509256","commission_sale":"0","discount_info_list":[],"goods_category":"02","kagou_sign":"N","name":"火腿鸡蛋三明治 1便","quantity":1,"row_no":1,"sell_price":7.5,"total_amount":7.50,"total_discount":0}')]
         items << ['6923127360100': jsonSlurper.parseText('{"barcode":"6923127360100","commission_sale":"0", "discount_info_list":[],"goods_category":"07","kagou_sign":"N","name":"香辣粉丝包","quantity":1.000,"row_no":1,"sell_price":2.50,"total_amount":2.50,"total_discount":0}')]
         items << ['6920459950180': jsonSlurper.parseText('{"barcode":"6920459950180","commission_sale":"0","discount_info_list":[{"discount_amount":6.00,"discount_quantity":2.0}],"goods_category":"18","kagou_sign":"N","name":"贝纳颂咖啡拿铁","quantity":2,"row_no":1,"sell_price":7,"total_amount":14.00,"total_discount":6.00}')]
         items << ['6902538008548': jsonSlurper.parseText('{"barcode":"6902538008548","commission_sale":"0","discount_info_list":[{"discount_amount":5.90,"discount_quantity":1.0}],"goods_category":"17","kagou_sign":"N","name":"达能优白动植蛋白乳饮拿铁味","quantity":1,"row_no":2,"sell_price":9.9,"total_amount":9.90,"total_discount":5.90}')]
@@ -269,7 +269,7 @@ class Helper {
 
         if(!(barcodes instanceof ArrayList) )
             i << new OrderItem(*:barcodes)
-        return i + blackItems
+        return i +  new OrderItem(items['6901028075831']) //额外加一个黑名单商品
     }
 
     protected getUnionpayPan() {

@@ -1,10 +1,7 @@
 package ZhongBai
 
 import Core.RequestDelegate
-import com.kargo.LawsonPosHubService
 import com.kargo.request.GoodsDetailRequest
-import com.kargo.response.BarcodeResponse
-import com.sun.scenario.effect.impl.sw.java.JSWBlend_SRC_OUTPeer
 import groovy.sql.Sql
 import spock.lang.*
 import com.kargo.response.GoodsDetailResponse
@@ -66,7 +63,7 @@ class ZhongBaiCodeSpec extends Specification {
 
     def "call confirm"() {
         given:
-        sql = DBConnector();
+        sql = PosHubDBConnector();
         def amount = goodsDetailRequest.total_fee // 总金额
         when: "Request ZhongBai api service 101 with useFlag=1"
         def paymentConfirmResponse = paymentConfirmRequest([], null, outTradeNo, totalFee, 0, 0)

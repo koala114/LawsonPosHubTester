@@ -2,13 +2,9 @@ package Core
 
 import com.kargo.LawsonPosHubService
 import com.kargo.internal.constants.ClientConstant
-import com.kargo.request.BarCodeRequest
-import com.kargo.request.CreatePaymentRequest
 import com.kargo.request.GoodsDetailRequest
-import com.kargo.request.detail.OrderItem
 import com.kargo.response.CreatePaymentResponse
 import com.kargo.response.ExchangeConfirmResponse
-import com.kargo.response.GoodsDetailResponse
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.PaymentConfirmResponse
 import com.kargo.response.PaymentRefundResponse
@@ -16,27 +12,26 @@ import com.kargo.response.detail.BillBizInfo
 import groovy.sql.Sql
 import groovy.transform.TupleConstructor
 import com.kargo.request.detail.OrderItem
-import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
 
 @TupleConstructor
 class RequestDelegate extends Helper {
-    private static final Logger log = Logger.getLogger(RequestDelegate.class);
+    private static final Logger log = Logger.getLogger(RequestDelegate.class)
 
-    RequestDelegate(){
+    RequestDelegate(mid, sessionKey, kargoUrl, store_id){
         super.mid = mid
         super.sessionKey = sessionKey
         super.kargoUrl = kargoUrl
         super.store_id = store_id
-        super.user_id = user_id
-        super.pos_id = pos_id
-        super.jar_version = ClientConstant.JAR_VERSION
+        super.user_id = store_id + '01'
+        super.pos_id = '02'
+        super.jar_version = ClientConstant.LS_Jar_Version
 
     }
 
-    def uploadGoodsRequest(String memberNo, String outTradeNo, def items, def blackItems){
+    def uploadGoodsRequest(String memberNo, String outTradeNo, def items){
         LawsonPosHubService ls = lawsonPosHubService('/uploadgoodsdetail')
-        GoodsDetailRequest request = createGoodsDetailRequest(memberNo, outTradeNo, items, blackItems)
+        GoodsDetailRequest request = createGoodsDetailRequest(memberNo, outTradeNo, items)
         def response = ls.execute(request)
         return [response, request]
     }
@@ -83,13 +78,25 @@ class RequestDelegate extends Helper {
         return ls.execute(paymentRefundRequest)
     }
 
+    PaymentRefundResponse paymentRefundRequest(String code, String oldTradeNo){
+        LawsonPosHubService ls = lawsonPosHubService('/traderefund')
+        def paymentRefundRequest = createPaymentRefundRequest(code, oldTradeNo)
+        return ls.execute(paymentRefundRequest)
+    }
+
     private LawsonPosHubService lawsonPosHubService(String miyaUrl){
         return new LawsonPosHubService(mid, store_id, pos_id, kargoUrl, sessionKey, miyaUrl, "", "", "pay")
     }
 
-    public DBConnector(){
+    public PosHubDBConnector(){
         Sql sql
         sql = Sql.newInstance("jdbc:mysql://47.101.50.215:13306/lawson_hub?autoReconnect=true&useUnicode=true&characterEncoding=utf8",
+                "root", "karGo!23456", "com.mysql.jdbc.Driver")
+    }
+
+    public KargoHubDBConnector(){
+        Sql sql
+        sql = Sql.newInstance("jdbc:mysql://47.101.50.215:13306/ks_transaction?autoReconnect=true&useUnicode=true&characterEncoding=utf8",
                 "root", "karGo!23456", "com.mysql.jdbc.Driver")
     }
 }
