@@ -109,8 +109,10 @@ class UploadGoodsDetail4KargoSpec extends Specification {
     def "call confirm"(){
         given:
         def amount = goodsDetailRequest.total_fee // 总金额
+        and:
+        def orderItemList = goodsDetailRequest.getOrder_items()
         when:
-        def paymentConfirmResponse = paymentConfirmRequest([], barcodeYoRenResponse.getUser_info().code, outTradeNo, amount, 0, 0)
+        def paymentConfirmResponse = paymentConfirmRequest([], barcodeYoRenResponse.getUser_info().code, outTradeNo, amount, 0, 0, orderItemList)
         then:
         with(paymentConfirmResponse){
             responseCode == '0000'

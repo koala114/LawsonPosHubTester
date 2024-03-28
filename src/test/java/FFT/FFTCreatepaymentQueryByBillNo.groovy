@@ -27,7 +27,7 @@ class FFTCreatepaymentQueryByBillNo extends Specification {
 
     def setup(){
         def env = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
-        requestDelegate = new RequestDelegate(env)
+        requestDelegate = new RequestDelegate('00062000000', '9Y3SGFCLR2BH4T51', 'http://127.0.0.1:21001', '208888')
     }
 
     def "call barcode to payment"(){

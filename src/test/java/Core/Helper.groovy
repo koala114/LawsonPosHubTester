@@ -35,7 +35,7 @@ class Helper {
         return new LawsonPosHubService(mid, store_id, pos_id, kargoUrl, sessionKey, miyaUrl, "", "", "pay")
     }
 
-    protected GoodsDetailRequest createGoodsDetailRequestString(outTradeNo, OrderItem item){
+    protected GoodsDetailRequest createGoodsDetailRequest(outTradeNo, OrderItem item){
         def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':0, 'out_trade_no':store_id + outTradeNo,
                      'pos_id':pos_id, 'pos_version':'1', 'store_id': store_id, 'total_fee':item.total_amount, 'user_id':user_id, 'order_items':[item]]
         GoodsDetailRequest request = new GoodsDetailRequest(*:paras)
@@ -78,6 +78,16 @@ class Helper {
     }
 
     protected PaymentConfirmRequest createPaymentConfirmRequest(def couponList, String memberNo, String outTradeNo, Double totalFee, Double pointAmount, Double prepaidAmount){
+        def paras = ['coupon_code':couponList, 'currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberPromotion\":\"0\",\"memberPromotionRec\":\"\",\"memberAmount\":0.0}', 'out_trade_no': store_id + outTradeNo, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix),
+                     'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'user_id':user_id, 'offline_flag':'0', 'point_amount':0, 'prepaid_amount':prepaidAmount?prepaidAmount:0, 'point_amount': pointAmount?pointAmount:0]
+        if (memberNo)
+            paras = paras + ['member_no': memberNo]
+
+        PaymentConfirmRequest request = new PaymentConfirmRequest(paras);
+        return request
+    }
+
+    protected PaymentConfirmRequest createPaymentConfirmRequest(def couponList, String memberNo, String outTradeNo, Double totalFee, Double pointAmount, Double prepaidAmount,  List<OrderItem> orderItemList){
         def paras = ['coupon_code':couponList, 'currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberPromotion\":\"0\",\"memberPromotionRec\":\"\",\"memberAmount\":0.0}', 'out_trade_no': store_id + outTradeNo, 'trade_no':store_id.concat(outTradeNo).concat(++tradeNoPostfix),
                      'pos_id':pos_id, 'store_id':store_id, 'total_fee':totalFee, 'user_id':user_id, 'offline_flag':'0', 'point_amount':0, 'prepaid_amount':prepaidAmount?prepaidAmount:0, 'point_amount': pointAmount?pointAmount:0]
         if (memberNo)

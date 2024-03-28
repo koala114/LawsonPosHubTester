@@ -3,6 +3,7 @@ package Core
 import com.kargo.LawsonPosHubService
 import com.kargo.internal.constants.ClientConstant
 import com.kargo.request.GoodsDetailRequest
+import com.kargo.request.PaymentConfirmRequest
 import com.kargo.response.CreatePaymentResponse
 import com.kargo.response.ExchangeConfirmResponse
 import com.kargo.response.BarcodeResponse
@@ -64,6 +65,14 @@ class RequestDelegate extends Helper {
         LawsonPosHubService ls = lawsonPosHubService('/tradeconfirm')
 
         return ls.execute(createPaymentConfirmRequest(couponList, memberNo, outTradeNo, totalFee, pointAmount, prepaidAmount))
+    }
+
+    PaymentConfirmResponse paymentConfirmRequest(def couponList, String memberNo, String outTradeNo, Double totalFee, Double pointAmount, Double prepaidAmount, List<OrderItem> orderItemList){
+        LawsonPosHubService ls = lawsonPosHubService('/tradeconfirm')
+        PaymentConfirmRequest paymentConfirmRequest = createPaymentConfirmRequest(couponList, memberNo, outTradeNo, totalFee, pointAmount, prepaidAmount)
+        paymentConfirmRequest.setOrder_items(orderItemList)
+
+        return ls.execute(paymentConfirmRequest)
     }
 
     CreatePaymentResponse createPaymentRequest(String dynamicId, String outTradeNo, ArrayList<BillBizInfo> billBizInfo){
