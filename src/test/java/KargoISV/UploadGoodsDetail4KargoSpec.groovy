@@ -20,9 +20,7 @@ class UploadGoodsDetail4KargoSpec extends Specification {
     @Delegate RequestDelegate requestDelegate
 
     def setup() {
-        def dev = ['mid': '00062000000', 'sessionKey': '9Y3SGFCLR2BH4T51', 'kargoUrl': 'http://127.0.0.1:21001', 'store_id': '208888']
-        //def dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://47.101.50.215:21001', 'store_id':'208888', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
-        requestDelegate = new RequestDelegate('00062000000', '9Y3SGFCLR2BH4T51', 'http://127.0.0.1:21001', '208888')
+        requestDelegate = new RequestDelegate('00062000000', '9Y3SGFCLR2BH4T51', 'http://127.0.0.1:21001', '203118')
     }
 
     def "call uploadgoodsdetail without member_no"() {
@@ -140,7 +138,7 @@ class UploadGoodsDetail4KargoSpec extends Specification {
         with(paymentRefundResponse){
             responseCode == '0000'
             responseMessage == '交易成功完成'
-            biz_type == '00'
+            biz_type == '00' // e支付 退款00
             ret_code == '00'
             status == '2000'
         }

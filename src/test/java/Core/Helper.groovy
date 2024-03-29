@@ -19,7 +19,7 @@ import static java.util.TimeZone.getTimeZone
 
 class Helper {
     private static final Logger log = Logger.getLogger(Helper.class);
-    @Shared members = ['13818595461':'1900267772339']
+    //@Shared members = ['13818595461':'1900267772339']
     String mid, store_id, pos_id, kargoUrl, sessionKey, user_id, jar_version
     static String tradeNoPostfix = 0
     @Shared jsonSlurper = new JsonSlurper()
@@ -46,7 +46,7 @@ class Helper {
         def totalFee = 0.0
         def discount = []
 
-        def its = createItems(items)
+        def its = Items.createItems(items)
         its.each {totalFee =it.quantity*it.sell_price + totalFee; return totalFee}
         log.info("totalFee is " + totalFee)
         its.each {discount = it.discount_info_list.discount_amount + discount}
@@ -239,7 +239,7 @@ class Helper {
         def discount = []
         def wareReqDtoArrayList = []
 
-        def its = createItems(items, blackItems)
+        def its = Items.createItems(items, blackItems)
         its.each {totalFee =it.quantity*it.sell_price + totalFee; return totalFee}
         log.info("totalFee is " + totalFee)
         its.each {discount = it.discount_info_list.discount_amount + discount}
@@ -258,7 +258,7 @@ class Helper {
         return request
     }
 
-    private createItems(def barcodes){
+   /* private createItems(def barcodes){
         def i = []
         def items = ['6921168509256': jsonSlurper.parseText('{"barcode":"6921168509256","commission_sale":"0","discount_info_list":[],"goods_category":"02","kagou_sign":"N","name":"火腿鸡蛋三明治 1便","quantity":1,"row_no":1,"sell_price":7.5,"total_amount":7.50,"total_discount":0}')]
         items << ['6923127360100': jsonSlurper.parseText('{"barcode":"6923127360100","commission_sale":"0", "discount_info_list":[],"goods_category":"07","kagou_sign":"N","name":"香辣粉丝包","quantity":1.000,"row_no":1,"sell_price":2.50,"total_amount":2.50,"total_discount":0}')]
@@ -281,7 +281,7 @@ class Helper {
             i << new OrderItem(*:barcodes)
         return i +  new OrderItem(items['6901028075831']) //额外加一个黑名单商品
     }
-
+*/
     protected getUnionpayPan() {
         def get = new URL("https://open.unionpay.com/tjweb/ij/tool/qrcodeFormPage/coverSweepReceiverApp").openConnection()
         def responsePUID = ''

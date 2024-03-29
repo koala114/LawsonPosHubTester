@@ -22,18 +22,15 @@ class YoRenDealDoneNoticeSpec extends Specification {
     @Delegate RequestDelegate requestDelegate
 
     def setup(){
-       def dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'360320', 'user_id':'36032001',  'pos_id':'01', 'jar_version':'1']
-        //def dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://47.101.50.215:21001', 'store_id':'208888', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
-        requestDelegate = new RequestDelegate(dev)
+        requestDelegate = new RequestDelegate('00062000000', '9Y3SGFCLR2BH4T51', 'http://127.0.0.1:21001', '350909')
     }
 
     def "call uploadgoodsdetail without member_no"(){
         given:
-        items = ['6920459950180', '2501408063102', '6902538008548'] // 6901028075831 黑名单商品
-        blackItems = []
+        items = ['6970399927247', '6938888889896'] // 6901028075831 黑名单商品
 
         when:
-        def (GoodsDetailResponse goodsDetailResponse, goodsDetailReqObj) = uploadGoodsRequest(null, outTradeNo, items, blackItems)
+        def (GoodsDetailResponse goodsDetailResponse, goodsDetailReqObj) = uploadGoodsRequest(null, outTradeNo, items)
         goodsDetailRequest = goodsDetailReqObj
         then:
         with(goodsDetailResponse){
@@ -44,7 +41,7 @@ class YoRenDealDoneNoticeSpec extends Specification {
 
     def "call barcode to payment"(){
         when:
-        barcodeResponse = barCodeRequest(pan, outTradeNo, goodsDetailRequest.total_fee)
+        barcodeResponse = barCodeRequest(pan, outTradeNo, goodsDetailRequest.total_fee / 2)
         then:
         with(barcodeResponse){
             responseCode == '0000'
