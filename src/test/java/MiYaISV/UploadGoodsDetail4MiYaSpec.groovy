@@ -3,13 +3,8 @@ package MiYaISV
 import Core.Helper
 import Core.RequestDelegate
 import com.kargo.request.GoodsDetailRequest
-import com.kargo.request.PaymentConfirmRequest
-import com.kargo.request.PaymentRefundRequest
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.GoodsDetailResponse
-import com.kargo.response.PaymentConfirmResponse
-import com.kargo.response.PaymentRefundResponse
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -23,7 +18,11 @@ class UploadGoodsDetail4MiYaSpec extends Specification {
     @Delegate RequestDelegate requestDelegate
 
     def setup() {
-        requestDelegate = new RequestDelegate('00062000000', '9Y3SGFCLR2BH4T51', 'http://127.0.0.1:21001', '350909')
+        /*  ------ 联调环境 ------
+            http://139.196.51.187:21001
+            https://lawson-uat-loadcache.kargotest.com/LoadCache/dataCache/init/lawsonKCManagerData
+         */
+        requestDelegate = new RequestDelegate('00062000000', '9Y3SGFCLR2BH4T51', 'http://139.196.51.187:21001', '208888')
     }
 
     def "call uploadgoodsdetail without member_no"(){
