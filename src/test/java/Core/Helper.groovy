@@ -19,7 +19,7 @@ import static java.util.TimeZone.getTimeZone
 
 class Helper {
     private static final Logger log = Logger.getLogger(Helper.class);
-    String mid, store_id, pos_id, kargoUrl, sessionKey, user_id
+    String mid, store_id, pos_id, kargoUrl, sessionKey, user_id, jar_version
     static String tradeNoPostfix = 0
     @Shared jsonSlurper = new JsonSlurper()
 
@@ -36,7 +36,7 @@ class Helper {
 
     protected GoodsDetailRequest createGoodsDetailRequest(outTradeNo, OrderItem item){
         def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':0, 'out_trade_no':store_id + outTradeNo,
-                     'pos_id':pos_id, 'pos_version':'1', 'store_id': store_id, 'total_fee':item.total_amount, 'user_id':user_id, 'order_items':[item]]
+                     'pos_id':pos_id, 'store_id': store_id, 'total_fee':item.total_amount, 'user_id':user_id, 'order_items':[item]]
         GoodsDetailRequest request = new GoodsDetailRequest(*:paras)
         return request
     }
