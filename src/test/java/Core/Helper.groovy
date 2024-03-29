@@ -19,8 +19,7 @@ import static java.util.TimeZone.getTimeZone
 
 class Helper {
     private static final Logger log = Logger.getLogger(Helper.class);
-    //@Shared members = ['13818595461':'1900267772339']
-    String mid, store_id, pos_id, kargoUrl, sessionKey, user_id, jar_version
+    String mid, store_id, pos_id, kargoUrl, sessionKey, user_id
     static String tradeNoPostfix = 0
     @Shared jsonSlurper = new JsonSlurper()
 
@@ -55,7 +54,7 @@ class Helper {
         log.info("totalFee - discount = " + totalFee)
 
         def paras = ['currency':'CNY', 'dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'extraInfo':'{\"memberAmount\":0.0}', 'modify_flag':0, 'out_trade_no':store_id + outTradeNo,
-                     'pos_id':pos_id, 'pos_version':jar_version, 'store_id': this.store_id, 'total_fee':totalFee.round(2), 'user_id':user_id, 'order_items':its]
+                     'pos_id':pos_id, 'store_id': this.store_id, 'total_fee':totalFee.round(2), 'user_id':user_id, 'order_items':its]
         if(memberNo)
             paras << [ 'member_no': memberNo, 'modify_flag': 1]
         GoodsDetailRequest request = new GoodsDetailRequest(*:paras)

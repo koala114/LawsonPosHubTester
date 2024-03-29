@@ -24,7 +24,12 @@ class Items {
 //        tmp = jsonSlurper.parseText('{"barcode":"401022","commission_sale":"0","discount_info_list":[],"goods_category":"01","kagou_sign":"N","name":"臻享饭团(纯牛肉汉堡)1便","quantity":1,"row_no":1,"sell_price":8.9,"total_amount":8.90,"total_discount":0}')
 //        i << new OrderItem(*:tmp)
 
-        items.each {k, v -> if(k in barcodes) i << new OrderItem(*:v)}
+        items.each {k, v -> if(k in barcodes) {
+            OrderItem o = new OrderItem(*:v)
+            o.setRow_no(i.size() + 1)
+            i << o
+            }
+        }
 
         if(!(barcodes instanceof ArrayList) )
             i << new OrderItem(*:barcodes)

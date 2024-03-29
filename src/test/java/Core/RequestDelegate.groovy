@@ -27,7 +27,6 @@ class RequestDelegate extends Helper {
         super.user_id = store_id + '01'
         super.pos_id = '02'
         super.jar_version = ClientConstant.LS_Jar_Version
-
     }
 
     def uploadGoodsRequest(String memberNo, String outTradeNo, def items){

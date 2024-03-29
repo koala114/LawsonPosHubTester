@@ -1,6 +1,5 @@
 package MiYaISV
 
-import Core.Helper
 import Core.RequestDelegate
 import com.kargo.request.GoodsDetailRequest
 import com.kargo.response.BarcodeResponse
@@ -22,7 +21,7 @@ class UploadGoodsDetail4MiYaSpec extends Specification {
             http://139.196.51.187:21001
             https://lawson-uat-loadcache.kargotest.com/LoadCache/dataCache/init/lawsonKCManagerData
          */
-        requestDelegate = new RequestDelegate('00062000000', '9Y3SGFCLR2BH4T51', 'http://139.196.51.187:21001', '208888')
+        requestDelegate = new RequestDelegate('00062000000', '9Y3SGFCLR2BH4T51', 'http://127.0.0.1:21001', '350909')
     }
 
     def "call uploadgoodsdetail without member_no"(){
