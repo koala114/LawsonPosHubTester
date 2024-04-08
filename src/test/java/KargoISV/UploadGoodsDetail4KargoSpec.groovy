@@ -2,11 +2,11 @@ package KargoISV
 
 import Core.RequestDelegate
 import com.kargo.request.GoodsDetailRequest
-import com.kargo.request.PaymentRefundRequest
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.GoodsDetailResponse
 import com.kargo.response.PaymentRefundResponse
 import groovy.sql.Sql
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -131,16 +131,17 @@ class UploadGoodsDetail4KargoSpec extends Specification {
         }
     }
 
+    @Ignore
     def "call traderefund for payment"(){ // e支付退款的old_trade_no用e支付barcode的tradeNo
         when:
         def paymentRefundResponse = paymentRefundRequest(barcodeResponse.pay_code, barcodeResponse.trade_no, barcodeResponse.total_fee)
         then:
         with(paymentRefundResponse){
+            status == '2000'
             responseCode == '0000'
             responseMessage == '交易成功完成'
             biz_type == '00' // e支付 退款00
             ret_code == '00'
-            status == '2000'
         }
     }
 

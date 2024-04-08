@@ -106,7 +106,7 @@ class Helper {
     protected PaymentRefundRequest createPaymentRefundRequest(String memberNo, String oldTradeNo){
         def refundOutTradeNo = (new Date()).format("ddHHmmssSSS", getTimeZone('Asia/Shanghai'))
         def paras = ['dt':(new Date()).format("yyyy-MM-dd HH:mm:ss", getTimeZone('Asia/Shanghai')), 'member_no':memberNo, 'pos_id':pos_id, 'store_id':store_id, 'user_id':user_id, 'old_trade_no':oldTradeNo, 'order_items':[],
-                     'out_trade_no': refundOutTradeNo, 'trade_no':refundOutTradeNo + tradeNoPostfix]
+                     'out_trade_no':  store_id.concat(refundOutTradeNo), 'trade_no': store_id.concat(refundOutTradeNo) + tradeNoPostfix]
 
         PaymentRefundRequest request = new PaymentRefundRequest(paras);
         return request

@@ -60,14 +60,14 @@ class eBarcodeAndRefund extends Helper {
         given:
         def client = createLawsonPosHubService(dev, '/traderefund')
         //PaymentRefundRequest request = createPaymentRefundRequest(barcodeResponse.pay_code, barcodeResponse.getTrade_no(), 0.01 )
-        PaymentRefundRequest request = createPaymentRefundRequest("050", "203118131150210721", 20.90 )
+        PaymentRefundRequest request = createPaymentRefundRequest("050", "203118081438595582", 20.90 )
         when:
         resp = (PaymentRefundResponse) client.execute(request)
         then:
         with(resp){
+            status == '2000'
             responseCode == '0000'
             biz_type == '00' // e支付 退款00
-            status == '2000'
         }
     }
 }

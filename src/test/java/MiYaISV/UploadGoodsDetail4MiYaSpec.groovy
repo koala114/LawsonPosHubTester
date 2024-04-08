@@ -4,6 +4,7 @@ import Core.RequestDelegate
 import com.kargo.request.GoodsDetailRequest
 import com.kargo.response.BarcodeResponse
 import com.kargo.response.GoodsDetailResponse
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -144,11 +145,11 @@ class UploadGoodsDetail4MiYaSpec extends Specification {
         def paymentRefundResponse = paymentRefundRequest(barcodeResponse.pay_code, barcodeResponse.trade_no, barcodeResponse.total_fee)
         then:
         with(paymentRefundResponse){
+            status == '2000'
             responseCode == '0000'
             responseMessage == '退款成功'
             biz_type == '00'
             ret_code == '00'
-            status == '2000'
         }
     }
 }

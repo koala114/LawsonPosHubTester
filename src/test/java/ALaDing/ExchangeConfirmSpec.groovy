@@ -18,8 +18,7 @@ class ExchangeConfirmSpec extends Specification {
     @Delegate RequestDelegate requestDelegate
 
     def setup(){
-        def dev = ['mid':'00062000000', 'sessionKey':'9Y3SGFCLR2BH4T51', 'kargoUrl':'http://127.0.0.1:21001', 'store_id':'203118', 'user_id':'20311801',  'pos_id':'01', 'jar_version':'1']
-        requestDelegate = new RequestDelegate(dev)
+        requestDelegate = new RequestDelegate('00062000000', '9Y3SGFCLR2BH4T51', 'http://127.0.0.1:21001', '203118')
     }
 
     def "call uploadgoodsdetail without member_no"(){
@@ -28,7 +27,7 @@ class ExchangeConfirmSpec extends Specification {
         blackItems = []
 
         when:
-        def (GoodsDetailResponse goodsDetailResponse, goodsDetailReqObj) = uploadGoodsRequest(null, outTradeNo, items, blackItems)
+        def (GoodsDetailResponse goodsDetailResponse, goodsDetailReqObj) = uploadGoodsRequest(null, outTradeNo, items)
         goodsDetailRequest = goodsDetailReqObj
         then:
         with(goodsDetailResponse){
@@ -56,7 +55,7 @@ class ExchangeConfirmSpec extends Specification {
     def "call uploadgoodsdetail with member_no"(){
         given:
         when:
-        def (GoodsDetailResponse goodsDetailResponse, goodsDetailReqObj) = uploadGoodsRequest(barcodeYoRenResponse.user_info.code, outTradeNo, items, blackItems)
+        def (GoodsDetailResponse goodsDetailResponse, goodsDetailReqObj) = uploadGoodsRequest(barcodeYoRenResponse.user_info.code, outTradeNo, items)
         goodsDetailRequest = goodsDetailReqObj
         then:
         with(goodsDetailResponse){
@@ -86,7 +85,6 @@ class ExchangeConfirmSpec extends Specification {
         //'899320324020614340269000000000010006'|'032'||totalFee - 10.0 // 第二次用券是订单总金额 - 阿拉订返回的券金额10元 = 10.9
     }
 
-    @Ignore
     def "call exchangeconfirm"() {
         given:
         // 兑换业务传券号；撤销业务不传券号也需要传券金额payAmt
